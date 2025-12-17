@@ -107,15 +107,15 @@ def serve_static(filename):
     filename_decoded = unquote(filename)
     
     # Obtener el directorio base (funciona tanto en local como en Vercel)
-    # En Vercel, el directorio de trabajo puede ser diferente
     base_dir = os.path.dirname(os.path.abspath(__file__))
+    cwd = os.getcwd()
     
-    # Lista de posibles ubicaciones para archivos estáticos
+    # Lista de posibles ubicaciones para archivos estáticos (orden de prioridad)
     possible_paths = [
-        os.path.join(base_dir, 'public', 'static'),  # Vercel producción
+        os.path.join(base_dir, 'public', 'static'),  # Vercel: desde app.py
+        os.path.join(cwd, 'public', 'static'),  # Vercel: desde working directory
         os.path.join(base_dir, 'static'),  # Desarrollo local
-        os.path.join(os.getcwd(), 'public', 'static'),  # Vercel alternativo
-        os.path.join(os.getcwd(), 'static'),  # Fallback
+        os.path.join(cwd, 'static'),  # Fallback
     ]
     
     # Intentar cada path hasta encontrar el archivo
@@ -123,7 +123,10 @@ def serve_static(filename):
         if os.path.exists(static_path):
             file_path = os.path.join(static_path, filename_decoded)
             if os.path.exists(file_path):
-                return send_from_directory(static_path, filename_decoded)
+                # Enviar el archivo con headers apropiados
+                response = send_from_directory(static_path, filename_decoded)
+                response.headers['Cache-Control'] = 'public, max-age=31536000'
+                return response
     
     # Si no se encuentra, retornar 404
     from flask import abort
