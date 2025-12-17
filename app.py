@@ -4,9 +4,10 @@ from flask import Flask, render_template, url_for, redirect, request
 
 # Configurar Flask para que funcione correctamente en Vercel
 # Asegurar que los templates y static folders estén correctamente configurados
+# Todo se sirve desde public/static
 app = Flask(__name__, 
             template_folder='templates',
-            static_folder='public/static' if os.path.exists('public/static') else 'static')
+            static_folder='public/static')
 
 # Clave única para acceso al panel de administración
 # IMPORTANTE: Cambiar por una clave segura antes de desplegar
@@ -56,7 +57,6 @@ def get_products():
     """
     # En Vercel, los archivos en public/ se sirven automáticamente
     # public/static/image.jpg -> accesible como /static/image.jpg
-    # Usar rutas directas sin codificación, Flask manejará los espacios
     return [
         {
             "id": "smart-plug",
@@ -95,26 +95,7 @@ def home():
 
 # NOTA: En Vercel, los archivos en public/ se sirven automáticamente
 # No necesitamos una ruta /static/ en Flask porque Vercel los sirve directamente
-# Esta ruta solo se usa en desarrollo local si existe la carpeta static/
-if os.path.exists('static') and not os.path.exists('public/static'):
-    @app.route('/static/<path:filename>')
-    def serve_static(filename):
-        """Sirve archivos estáticos solo en desarrollo local"""
-        from flask import send_from_directory
-        from urllib.parse import unquote
-        import os
-        
-        filename_decoded = unquote(filename)
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        static_folder = os.path.join(base_dir, 'static')
-        
-        if os.path.exists(static_folder):
-            file_path = os.path.join(static_folder, filename_decoded)
-            if os.path.exists(file_path):
-                return send_from_directory(static_folder, filename_decoded)
-        
-        from flask import abort
-        abort(404)
+# Todos los archivos estáticos están en public/static/
 
 @app.route("/click/<product_id>")
 def track_click(product_id):
