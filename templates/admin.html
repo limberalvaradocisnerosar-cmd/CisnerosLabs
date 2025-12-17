@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <!-- Google Fonts: Inter (tipografía moderna) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN - Librería para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ============================================
+           RESET Y BASE - Mobile First
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 24px;
+            }
+        }
+
+        /* ============================================
+           LOGIN SCREEN - Pantalla de acceso
+           ============================================ */
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 48px 32px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: #86868b;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 1px solid #d2d2d7;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #1d1d1f;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0071e3;
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            background: #1d1d1f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .form-button:hover {
+            background: #000000;
+        }
+
+        .form-button:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            padding: 12px 16px;
+            background: #ff3b30;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* ============================================
+           DASHBOARD - Panel de métricas con gráficos
+           ============================================ */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-header {
+                margin-bottom: 40px;
+            }
+        }
+
+        .dashboard-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-subtitle {
+            font-size: 17px;
+            color: #86868b;
+        }
+
+        /* Card de Total Clicks */
+        .total-clicks-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        @media (min-width: 768px) {
+            .total-clicks-card {
+                border-radius: 20px;
+                padding: 32px;
+                margin-bottom: 32px;
+            }
+        }
+
+        .total-clicks-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .total-clicks-value {
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.03em;
+        }
+
+        /* Grid de gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1.2fr 1fr;
+                gap: 24px;
+                margin-bottom: 32px;
+            }
+        }
+
+        /* Cards de gráficos con scroll horizontal en móvil */
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            /* Scroll suave en iOS */
+            scrollbar-width: thin;
+            scrollbar-color: #d2d2d7 #f5f5f7;
+        }
+
+        /* Estilo de scrollbar para WebKit (Chrome, Safari) */
+        .chart-card::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .chart-card::-webkit-scrollbar-track {
+            background: #f5f5f7;
+            border-radius: 4px;
+        }
+
+        .chart-card::-webkit-scrollbar-thumb {
+            background: #d2d2d7;
+            border-radius: 4px;
+        }
+
+        .chart-card::-webkit-scrollbar-thumb:hover {
+            background: #86868b;
+        }
+
+        @media (min-width: 768px) {
+            .chart-card {
+                border-radius: 20px;
+                padding: 32px;
+                overflow: visible;
+            }
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            .chart-title {
+                font-size: 20px;
+                margin-bottom: 24px;
+            }
+        }
+
+        /* Contenedor de gráfico con ancho mínimo para scroll horizontal */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            min-width: 320px;
+            width: 100%;
+        }
+
+        @media (min-width: 480px) {
+            .chart-container {
+                min-width: 100%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Tabla de productos - Diseño responsive */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        @media (min-width: 768px) {
+            .table-card {
+                border-radius: 20px;
+                padding: 32px;
+            }
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .table-title {
+                font-size: 20px;
+                margin-bottom: 24px;
+            }
+        }
+
+        /* Lista de tarjetas para móvil */
+        .products-list-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .products-list-mobile {
+                display: none;
+            }
+        }
+
+        .product-card-mobile {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .product-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .product-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            flex: 1;
+        }
+
+        .product-card-clicks {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1d1d1f;
+            white-space: nowrap;
+        }
+
+        .product-card-category {
+            font-size: 12px;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* Tabla para desktop */
+        .products-table-desktop {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .products-table-desktop {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+            }
+        }
+
+        thead {
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f5f5f7;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f7;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 16px;
+            color: #1d1d1f;
+        }
+
+        .product-name-cell {
+            font-weight: 600;
+        }
+
+        .product-category-cell {
+            color: #86868b;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .product-clicks-cell {
+            font-weight: 700;
+            font-size: 18px;
+            text-align: right;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 32px;
+            color: #0071e3;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0077ed;
+        }
+    </style>
+</head>
+<body>
+    {% if not authenticated %}
+    <!-- ============================================
+         LOGIN SCREEN - Mostrar si no está autenticado
+         ============================================ -->
+    <div class="login-container">
+        <h1 class="login-title">Admin Access</h1>
+        <p class="login-subtitle">Enter your access key to view analytics</p>
+        
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" action="{{ url_for('admin') }}" class="login-form">
+            <div class="form-group">
+                <label for="key" class="form-label">Access Key</label>
+                <input 
+                    type="password" 
+                    id="key" 
+                    name="key" 
+                    class="form-input" 
+                    placeholder="Enter access key"
+                    required
+                    autofocus
+                >
+            </div>
+            <button type="submit" class="form-button">Access Dashboard</button>
+        </form>
+    </div>
+    
+    {% else %}
+    <!-- ============================================
+         DASHBOARD - Panel de métricas con gráficos
+         ============================================ -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Analytics Dashboard</h1>
+            <p class="dashboard-subtitle">Click metrics and performance analytics</p>
+        </div>
+
+        <!-- Card de Total Clicks -->
+        <div class="total-clicks-card">
+            <div class="total-clicks-label">Total Clicks</div>
+            <div class="total-clicks-value">{{ metrics.total }}</div>
+        </div>
+
+        <!-- Grid de gráficos -->
+        <div class="charts-grid">
+            <!-- Gráfico de barras -->
+            <div class="chart-card">
+                <h2 class="chart-title">Clicks by Product</h2>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico circular (donut) -->
+            <div class="chart-card">
+                <h2 class="chart-title">Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="donutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de productos - Diseño responsive -->
+        <div class="table-card">
+            <h2 class="table-title">Product Performance</h2>
+            
+            <!-- Lista de tarjetas para móvil -->
+            <div class="products-list-mobile">
+                {% for product in metrics.products %}
+                <div class="product-card-mobile">
+                    <div class="product-card-header">
+                        <div class="product-card-name">{{ product.title }}</div>
+                        <div class="product-card-clicks">{{ product.clicks }}</div>
+                    </div>
+                    <div class="product-card-category">{{ product.category }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Tabla para desktop -->
+            <table class="products-table-desktop">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th style="text-align: right;">Clicks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in metrics.products %}
+                    <tr>
+                        <td class="product-name-cell">{{ product.title }}</td>
+                        <td class="product-category-cell">{{ product.category }}</td>
+                        <td class="product-clicks-cell">{{ product.clicks }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+
+    <!-- Script para inicializar gráficos Chart.js -->
+    <script>
+        // Verificar que los elementos del dashboard existan antes de inicializar
+        (function() {
+            'use strict';
+            
+            const barChartEl = document.getElementById('barChart');
+            const donutChartEl = document.getElementById('donutChart');
+            
+            // Solo ejecutar si los elementos existen (usuario autenticado)
+            if (!barChartEl || !donutChartEl) {
+                return;
+            }
+
+            // Datos para gráficos (pasados desde el backend)
+            // IMPORTANTE: El linter puede mostrar errores aquí porque no entiende la sintaxis de Jinja2.
+            // Estos son FALSOS POSITIVOS - el código es válido cuando Flask renderiza el template.
+            // Los valores metrics.* se convierten en arrays/objetos JSON válidos de JavaScript.
+            var chartLabels = {{ metrics.chart_labels|tojson }};
+            var chartValues = {{ metrics.chart_values|tojson }};
+            var chartColors = {{ metrics.chart_colors|tojson }};
+            
+            // Validar que los datos existan
+            if (!chartLabels || !chartValues || !chartColors) {
+                return;
+            }
+
+            // Detectar si es móvil
+            const isMobile = window.innerWidth < 768;
+            
+            // Configuración común para gráficos (responsive)
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: isMobile ? 10 : 20
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: isMobile ? 12 : 20,
+                            font: {
+                                family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                size: isMobile ? 11 : 13,
+                                weight: 500
+                            },
+                            color: '#86868b',
+                            boxWidth: isMobile ? 12 : 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: isMobile ? 8 : 12,
+                        titleFont: {
+                            family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                            size: isMobile ? 12 : 14,
+                            weight: 600
+                        },
+                        bodyFont: {
+                            family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                            size: isMobile ? 11 : 13
+                        },
+                        cornerRadius: 8
+                    }
+                }
+            };
+
+            // Gráfico de barras
+            const barCtx = barChartEl.getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Clicks',
+                        data: chartValues,
+                        backgroundColor: chartColors,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: chartOptions.layout,
+                    plugins: chartOptions.plugins,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f5f5f7',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#86868b',
+                                font: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                    size: isMobile ? 10 : 12
+                                },
+                                padding: isMobile ? 5 : 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#86868b',
+                                font: {
+                                    family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                    size: isMobile ? 10 : 12
+                                },
+                                maxRotation: isMobile ? 45 : 0,
+                                minRotation: isMobile ? 45 : 0,
+                                padding: isMobile ? 5 : 10
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico circular (donut)
+            const donutCtx = donutChartEl.getContext('2d');
+            new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartValues,
+                        backgroundColor: chartColors,
+                        borderWidth: 0,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: chartOptions.layout,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: chartOptions.plugins.legend.labels
+                        },
+                        tooltip: chartOptions.plugins.tooltip
+                    }
+                }
+            });
+        })();
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -3,55 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon Finds That Make Life Easier</title>
-    <!-- Google Fonts: Inter (similar a SF Pro, tipografía moderna) -->
+    <title>Perfect Last-Minute Amazon Gifts 🎄</title>
+    <!-- Google Fonts: Inter (tipografía moderna) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           RESET Y BASE - Mobile First
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1d1d1f;
+            background: #ffffff;
+            font-size: 17px;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           SPLASH SCREEN - Intro animada (1-2 segundos)
+           ============================================ */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 50%, #f0f8f0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.8s ease-out 1.2s forwards;
+            /* Desaparece después de 1.2s, animación de 0.8s */
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .splash-title {
+            font-size: clamp(32px, 8vw, 48px);
+            font-weight: 700;
+            color: #1a5f3f;
+            /* Verde oscuro navideño premium */
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .splash-subtitle {
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 400;
+            color: #6e6e73;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* ============================================
+           HERO MINIMIZADO - Liviano y rápido
+           ============================================ */
+        .hero {
+            padding: 40px 24px 32px;
+            text-align: center;
+            background: #ffffff;
+            transition: padding 0.5s ease;
+        }
+
+        /* Hero después del splash - se hace más pequeño */
+        .hero.compact {
+            padding: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            margin: 0 auto;
+            transition: all 0.5s ease;
+        }
+
+        .hero.compact .hero-content {
+            max-width: 100%;
+        }
+
+        .hero-title {
+            font-size: clamp(28px, 6vw, 40px);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: #1a5f3f;
+            /* Verde navideño premium */
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+            transition: all 0.5s ease;
+        }
+
+        /* Hero compacto - línea infinita */
+        .hero.compact .hero-title {
+            font-size: 18px;
+            margin-bottom: 0;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        /* Gorro de Navidad pequeño sobre el título */
+        .christmas-hat {
+            position: absolute;
+            top: -20px;
+            right: -30px;
+            font-size: 24px;
+            animation: bounce 2s ease-in-out infinite;
+            transition: all 0.5s ease;
+        }
+
+        .hero.compact .christmas-hat {
+            position: relative;
+            top: 0;
+            right: 0;
+            font-size: 18px;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-5px) rotate(5deg);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(16px, 3vw, 18px);
+            font-weight: 400;
+            color: #6e6e73;
+            transition: all 0.5s ease;
+        }
+
+        /* Ocultar subtítulo cuando el hero se compacta */
+        .hero.compact .hero-subtitle {
+            display: none;
+        }
+
+        /* Contenedor de línea infinita */
+        .infinite-scroll {
+            display: flex;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .infinite-scroll-content {
+            display: flex;
+            white-space: nowrap;
+            animation: scroll-infinite 20s linear infinite;
+        }
+
+        .infinite-scroll-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a5f3f;
+        }
+
+        @keyframes scroll-infinite {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ============================================
+           PRODUCTS SECTION - Cards emocionales premium
+           ============================================ */
+        .products-section {
+            padding: 0 20px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 48px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 1px solid #f0f0f0;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        @media (hover: hover) {
+            .product-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            }
+        }
+
+        /* Badge "Perfect Gift" navideño */
+        .gift-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d7a4f 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(26, 95, 63, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .product-image-wrapper {
+            width: 100%;
+            background: #f5f5f7;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.03);
+        }
+
+        .product-content {
+            padding: 24px;
+        }
+
+        .product-category {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #86868b;
+            margin-bottom: 8px;
+        }
+
+        .product-title {
+            font-size: clamp(22px, 5vw, 28px);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
+
+        .product-description {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #6e6e73;
+            margin-bottom: 16px;
+        }
+
+        /* Info secundaria: precio y delivery */
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #1a5f3f;
+            font-weight: 500;
+        }
+
+        .product-info-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ============================================
+           CTA BUTTON - Grande, emocional, con subtexto
+           ============================================ */
+        .cta-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cta-button {
+            display: block;
+            width: 100%;
+            padding: 18px 32px;
+            background: linear-gradient(135deg, #1a5f3f 0%, #2d7a4f 100%);
+            /* Verde navideño premium */
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 16px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(26, 95, 63, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(26, 95, 63, 0.3);
+        }
+
+        @media (hover: hover) {
+            .cta-button:hover {
+                background: linear-gradient(135deg, #2d7a4f 0%, #1a5f3f 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(26, 95, 63, 0.4);
+            }
+        }
+
+        .cta-subtext {
+            text-align: center;
+            font-size: 13px;
+            color: #86868b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* ============================================
+           FOOTER - Disclaimer discreto
+           ============================================ */
+        .footer {
+            padding: 40px 24px;
+            text-align: center;
+            background: #f5f5f7;
+            border-top: 1px solid #e5e5e7;
+        }
+
+        .footer-disclaimer {
+            font-size: 13px;
+            font-weight: 400;
+            color: #86868b;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           RESPONSIVE - Tablet y Desktop
+           ============================================ */
+        @media (min-width: 768px) {
+            .hero {
+                padding: 50px 24px 40px;
+            }
+
+            .products-section {
+                padding: 0 40px 80px;
+            }
+
+            .product-card {
+                margin-bottom: 64px;
+            }
+
+            .product-content {
+                padding: 32px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .products-section {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 32px;
+            }
+
+            .product-card {
+                margin-bottom: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Hero Section: Diseño centrado, limpio, impactante -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Amazon Finds That Make Life Easier</h1>
-            <p class="hero-subtitle">Smart, simple and useful products — perfect gifts that arrive fast</p>
+    <!-- ============================================
+         SPLASH SCREEN - Intro animada (1-2 segundos)
+         ============================================ -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <h1 class="splash-title">Perfect Last-Minute Amazon Gifts 🎄</h1>
+            <p class="splash-subtitle">Arrives fast. Actually useful.</p>
+        </div>
+    </div>
+
+    <!-- ============================================
+         HERO MINIMIZADO - Liviano y rápido
+         Se convierte en línea infinita después del splash
+         ============================================ -->
+    <section class="hero" id="heroSection">
+        <div class="hero-content" id="heroContent">
+            <h1 class="hero-title">
+                Last-Minute Gifts That Actually Work
+                <span class="christmas-hat">🎄</span>
+            </h1>
+            <p class="hero-subtitle">Smart finds that arrive fast — perfect for anyone</p>
+        </div>
+        
+        <!-- Línea infinita (oculta inicialmente) -->
+        <div class="infinite-scroll" id="infiniteScroll" style="display: none;">
+            <div class="infinite-scroll-content">
+                <div class="infinite-scroll-item">
+                    <span>🎄</span>
+                    <span>Last-Minute Gifts That Actually Work</span>
+                </div>
+                <div class="infinite-scroll-item">
+                    <span>🎁</span>
+                    <span>Perfect for Anyone</span>
+                </div>
+                <div class="infinite-scroll-item">
+                    <span>⚡</span>
+                    <span>Fast Delivery</span>
+                </div>
+                <div class="infinite-scroll-item">
+                    <span>🎄</span>
+                    <span>Last-Minute Gifts That Actually Work</span>
+                </div>
+                <div class="infinite-scroll-item">
+                    <span>🎁</span>
+                    <span>Perfect for Anyone</span>
+                </div>
+                <div class="infinite-scroll-item">
+                    <span>⚡</span>
+                    <span>Fast Delivery</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Products Section: Cards grandes, táctiles, mobile-first -->
+    <!-- ============================================
+         PRODUCTS SECTION - Cards emocionales premium
+         ============================================ -->
     <main class="products-section">
         {% for product in products %}
         <article class="product-card">
-            <!-- Imagen grande que ocupa casi todo el ancho en mobile -->
+            <!-- Badge "Perfect Gift" navideño -->
+            <div class="gift-badge">
+                <span>🎁</span>
+                <span>Perfect Gift</span>
+            </div>
+
+            <!-- Imagen grande protagonista -->
             <div class="product-image-wrapper">
                 <img src="{{ product.image_url }}" alt="{{ product.title }}" class="product-image" loading="lazy">
             </div>
-            
+
             <!-- Contenido del producto -->
             <div class="product-content">
-                <!-- Categoría pequeña, uppercase, estilo Apple -->
+                <!-- Categoría -->
                 <div class="product-category">{{ product.category }}</div>
-                
+
                 <!-- Título grande y claro -->
                 <h2 class="product-title">{{ product.title }}</h2>
-                
+
                 <!-- Descripción corta y clara -->
                 <p class="product-description">{{ product.description }}</p>
-                
-                <!-- Botón CTA grande, redondeado, muy visible -->
-                <a href="{{ product.affiliate_url }}" target="_blank" rel="noopener noreferrer" class="cta-button">
-                    View on Amazon
-                </a>
+
+                <!-- Info secundaria: precio y delivery -->
+                <div class="product-info">
+                    <div class="product-info-item">
+                        <span>❄️</span>
+                        <span>Under $30</span>
+                    </div>
+                    <div class="product-info-item">
+                        <span>🚚</span>
+                        <span>Prime delivery</span>
+                    </div>
+                </div>
+
+                <!-- CTA grande con subtexto -->
+                <div class="cta-wrapper">
+                    <a href="{{ url_for('track_click', product_id=product.id) }}" target="_blank" rel="noopener noreferrer" class="cta-button">
+                        View on Amazon
+                    </a>
+                    <p class="cta-subtext">
+                        <span>⚡</span>
+                        <span>Fast delivery • Limited stock</span>
+                    </p>
+                </div>
             </div>
         </article>
         {% endfor %}
     </main>
 
-    <!-- Footer: Disclaimer discreto -->
+    <!-- ============================================
+         FOOTER - Disclaimer discreto
+         ============================================ -->
     <footer class="footer">
         <p class="footer-disclaimer">As an Amazon Associate I earn from qualifying purchases.</p>
     </footer>
+
+    <!-- ============================================
+         SCRIPT - Remover splash y transformar hero
+         ============================================ -->
+    <script>
+        window.addEventListener('load', function() {
+            const splash = document.getElementById('splashScreen');
+            const hero = document.getElementById('heroSection');
+            const heroContent = document.getElementById('heroContent');
+            const infiniteScroll = document.getElementById('infiniteScroll');
+            
+            // Después de que el splash desaparezca, transformar el hero
+            setTimeout(function() {
+                // Remover splash
+                if (splash) {
+                    splash.style.display = 'none';
+                }
+                
+                // Transformar hero a línea infinita
+                if (hero && heroContent && infiniteScroll) {
+                    hero.classList.add('compact');
+                    
+                    // Ocultar contenido original y mostrar línea infinita
+                    setTimeout(function() {
+                        heroContent.style.display = 'none';
+                        infiniteScroll.style.display = 'block';
+                    }, 500); // Esperar a que termine la transición
+                }
+            }, 2000); // 2 segundos total (1.2s visible + 0.8s fade)
+        });
+    </script>
 </body>
 </html>
-
