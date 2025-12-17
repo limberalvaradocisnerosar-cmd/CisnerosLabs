@@ -107,23 +107,25 @@ def serve_static(filename):
     filename_decoded = unquote(filename)
     
     # Obtener el directorio base (funciona tanto en local como en Vercel)
+    # En Vercel, el directorio de trabajo puede ser diferente
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Intentar desde public/static primero (para Vercel y producción)
-    public_static = os.path.join(base_dir, 'public', 'static')
-    if os.path.exists(public_static):
-        file_path = os.path.join(public_static, filename_decoded)
-        if os.path.exists(file_path):
-            return send_from_directory(public_static, filename_decoded)
+    # Lista de posibles ubicaciones para archivos estáticos
+    possible_paths = [
+        os.path.join(base_dir, 'public', 'static'),  # Vercel producción
+        os.path.join(base_dir, 'static'),  # Desarrollo local
+        os.path.join(os.getcwd(), 'public', 'static'),  # Vercel alternativo
+        os.path.join(os.getcwd(), 'static'),  # Fallback
+    ]
     
-    # Fallback a static/ (para desarrollo local si existe)
-    static_folder = os.path.join(base_dir, 'static')
-    if os.path.exists(static_folder):
-        file_path = os.path.join(static_folder, filename_decoded)
-        if os.path.exists(file_path):
-            return send_from_directory(static_folder, filename_decoded)
+    # Intentar cada path hasta encontrar el archivo
+    for static_path in possible_paths:
+        if os.path.exists(static_path):
+            file_path = os.path.join(static_path, filename_decoded)
+            if os.path.exists(file_path):
+                return send_from_directory(static_path, filename_decoded)
     
-    # Si no se encuentra, retornar 404 con mensaje de debug
+    # Si no se encuentra, retornar 404
     from flask import abort
     abort(404)
 
