@@ -2,7 +2,11 @@ import json
 import os
 from flask import Flask, render_template, url_for, redirect, request
 
-app = Flask(__name__)
+# Configurar Flask para que funcione correctamente en Vercel
+# Asegurar que los templates y static folders estén correctamente configurados
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='public/static' if os.path.exists('public/static') else 'static')
 
 # Clave única para acceso al panel de administración
 # IMPORTANTE: Cambiar por una clave segura antes de desplegar
