@@ -9,3 +9,7 @@ from app import app
 # Vercel serverless function handler
 # Exporta la app Flask para que Vercel pueda usarla
 
+# Handler para Vercel
+def handler(request):
+    return app(request.environ, request.start_response) if hasattr(request, 'environ') else app
+
