@@ -93,44 +93,28 @@ def home():
     products = get_products()
     return render_template("index.html", products=products)
 
-# Asegurar que Flask sirva archivos estáticos correctamente
-# En Vercel, los archivos en public/ se sirven automáticamente
-# Esta ruta es para desarrollo local y como fallback
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    """Sirve archivos estáticos desde la carpeta static o public/static"""
-    from flask import send_from_directory
-    import os
-    from urllib.parse import unquote
-    
-    # Decodificar el nombre del archivo si viene codificado
-    filename_decoded = unquote(filename)
-    
-    # Obtener el directorio base (funciona tanto en local como en Vercel)
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    cwd = os.getcwd()
-    
-    # Lista de posibles ubicaciones para archivos estáticos (orden de prioridad)
-    possible_paths = [
-        os.path.join(base_dir, 'public', 'static'),  # Vercel: desde app.py
-        os.path.join(cwd, 'public', 'static'),  # Vercel: desde working directory
-        os.path.join(base_dir, 'static'),  # Desarrollo local
-        os.path.join(cwd, 'static'),  # Fallback
-    ]
-    
-    # Intentar cada path hasta encontrar el archivo
-    for static_path in possible_paths:
-        if os.path.exists(static_path):
-            file_path = os.path.join(static_path, filename_decoded)
+# NOTA: En Vercel, los archivos en public/ se sirven automáticamente
+# No necesitamos una ruta /static/ en Flask porque Vercel los sirve directamente
+# Esta ruta solo se usa en desarrollo local si existe la carpeta static/
+if os.path.exists('static') and not os.path.exists('public/static'):
+    @app.route('/static/<path:filename>')
+    def serve_static(filename):
+        """Sirve archivos estáticos solo en desarrollo local"""
+        from flask import send_from_directory
+        from urllib.parse import unquote
+        import os
+        
+        filename_decoded = unquote(filename)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        static_folder = os.path.join(base_dir, 'static')
+        
+        if os.path.exists(static_folder):
+            file_path = os.path.join(static_folder, filename_decoded)
             if os.path.exists(file_path):
-                # Enviar el archivo con headers apropiados
-                response = send_from_directory(static_path, filename_decoded)
-                response.headers['Cache-Control'] = 'public, max-age=31536000'
-                return response
-    
-    # Si no se encuentra, retornar 404
-    from flask import abort
-    abort(404)
+                return send_from_directory(static_folder, filename_decoded)
+        
+        from flask import abort
+        abort(404)
 
 @app.route("/click/<product_id>")
 def track_click(product_id):
