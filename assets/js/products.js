@@ -30,23 +30,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Mapeo de descripciones conversacionales (3 líneas: dolor → solución → curiosidad)
-  // Estas descripciones siempre se usan, sin importar qué venga de Supabase
+  // Mapeo de descripciones conversacionales en inglés
   const productDescriptions = {
-    "smart plug": "Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.",
-    "smart plug wi-fi": "Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.",
-    "wifi": "Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.",
-    "plug": "Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.",
-    "organizador": "Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.",
-    "rotating": "Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.",
-    "rotating organizer": "Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.",
-    "360": "Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.",
-    "girador": "Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.",
-    "car": "Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.",
-    "car organizer": "Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.",
-    "car seat": "Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.",
-    "gap": "Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.",
-    "auto": "Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona."
+    "smart plug": "You always leave lights or devices plugged in without realizing it.<br>This plug lets you control everything from your phone.<br>Once you use it, it becomes part of your routine.",
+    "smart plug wi-fi": "You always leave lights or devices plugged in without realizing it.<br>This plug lets you control everything from your phone.<br>Once you use it, it becomes part of your routine.",
+    "wifi": "You always leave lights or devices plugged in without realizing it.<br>This plug lets you control everything from your phone.<br>Once you use it, it becomes part of your routine.",
+    "plug": "You always leave lights or devices plugged in without realizing it.<br>This plug lets you control everything from your phone.<br>Once you use it, it becomes part of your routine.",
+    "organizador": "Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.",
+    "rotating": "Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.",
+    "rotating organizer": "Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.",
+    "360": "Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.",
+    "girador": "Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.",
+    "car": "Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable.",
+    "car organizer": "Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable.",
+    "car seat": "Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable.",
+    "gap": "Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable.",
+    "auto": "Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable."
   };
 
   const cardsHtml = data
@@ -70,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // SIEMPRE usar descripción conversacional, nunca la de Supabase
       // Si no hay coincidencia, usar genérica conversacional
       if (!description) {
-        description = "Siempre te pasa algo que molesta todos los días.<br>Esta solución simple lo arregla sin complicaciones.<br>En Amazon se ve cómo funciona.";
+        description = "Something annoying happens to you every day.<br>This simple solution fixes it without complications.<br>See how it works on Amazon.";
       }
 
       return `
@@ -90,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             data-url="${productUrl}"
             class="product-cta track-click"
           >
-            <span>View on Amazon →</span>
+            <span>See how it works on Amazon →</span>
           </button>
         </article>
       `;

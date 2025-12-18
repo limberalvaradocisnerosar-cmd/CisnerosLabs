@@ -36,11 +36,12 @@
     >
       <div class="max-w-xl mx-auto text-center px-6">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 mb-4 leading-tight">
-          Small daily annoyances
-          <span class="font-bold block mt-1">you can fix in minutes</span>
+          Simple solutions for everyday frustrations
         </h1>
         <p class="text-base sm:text-lg text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
-          Not flashy gadgets. Just simple products that eliminate real friction from your day — things you end up using every single day.
+          Not flashy gadgets.<br>
+          Just products that eliminate real annoyances at home and in your car,<br>
+          and that you end up using more than you expected.
         </p>
         <div class="inline-flex items-center gap-2 bg-black text-white px-6 py-3.5 rounded-full shadow-lg shadow-black/20 hover:shadow-black/30 transition-shadow cursor-pointer">
           <span class="text-sm sm:text-base font-medium">See how they work</span>
@@ -56,24 +57,36 @@
     >
       <div class="hero-marquee-shell">
         <div class="hero-marquee px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm text-gray-500">
-          <span>Stop losing things between car seats ·</span>
-          <span> Control lights without getting up ·</span>
-          <span> Keep counters organized effortlessly ·</span>
-          <span> Simple solutions for everyday problems ·</span>
-          <span> Things you'll actually use daily ·</span>
-          <span> No complicated setup ·</span>
-          <span> Stop losing things between car seats ·</span>
-          <span> Control lights without getting up ·</span>
-          <span> Keep counters organized effortlessly ·</span>
-          <span> Simple solutions for everyday problems ·</span>
-          <span> Things you'll actually use daily ·</span>
-          <span> No complicated setup ·</span>
+          <span>Less clutter ·</span>
+          <span> Faster routines ·</span>
+          <span> Gifts that actually get used ·</span>
+          <span> Tech that helps, not complicates ·</span>
+          <span> No setup headaches ·</span>
+          <span> Everyday comfort ·</span>
+          <span> Simple solutions that stick ·</span>
+          <span> Less clutter ·</span>
+          <span> Faster routines ·</span>
+          <span> Gifts that actually get used ·</span>
+          <span> Tech that helps, not complicates ·</span>
+          <span> No setup headaches ·</span>
+          <span> Everyday comfort ·</span>
+          <span> Simple solutions that stick ·</span>
         </div>
       </div>
     </section>
 
     <!-- Sección productos (rellenada por products.js desde Supabase) -->
     <section id="products-section">
+      <!-- Bloque introductorio antes de los productos -->
+      <div class="products-intro-block">
+        <p class="products-intro-text">
+          These products aren't popular by accident.<br>
+          We chose them because they solve real problems,<br>
+          have good ratings on Amazon,<br>
+          and get used more than you'd imagine.
+        </p>
+      </div>
+
       <main id="products" class="products-grid">
         <!-- Fallback: productos de ejemplo con descripciones (se reemplazan por JS si Supabase funciona) -->
         <article class="product-card">
@@ -85,12 +98,12 @@
               alt="Smart Plug Wi-Fi"
             >
           </div>
-          <p class="product-description">Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.</p>
+          <p class="product-description">You always leave lights or devices plugged in without realizing it.<br>This plug lets you control everything from your phone.<br>Once you use it, it becomes part of your routine.</p>
           <button
             type="button"
             class="product-cta track-click"
           >
-            <span>View on Amazon →</span>
+            <span>See how it works on Amazon →</span>
           </button>
         </article>
 
@@ -103,12 +116,12 @@
               alt="360° Rotating Organizer"
             >
           </div>
-          <p class="product-description">Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.</p>
+          <p class="product-description">Messy drawers and shelves waste your time every day.<br>This organizer makes everything visible in seconds.<br>On Amazon you'll see why people end up using it all the time.</p>
           <button
             type="button"
             class="product-cta track-click"
           >
-            <span>View on Amazon →</span>
+            <span>See how it works on Amazon →</span>
           </button>
         </article>
 
@@ -121,20 +134,34 @@
               alt="Car Seat Gap Organizer"
             >
           </div>
-          <p class="product-description">Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.</p>
+          <p class="product-description">Items that get lost between seats and distract you while driving.<br>This simple solution keeps everything in place.<br>See on Amazon how it makes every trip more comfortable.</p>
           <button
             type="button"
             class="product-cta track-click"
           >
-            <span>View on Amazon →</span>
+            <span>See how it works on Amazon →</span>
           </button>
         </article>
       </main>
     </section>
 
+    <!-- Texto de confianza antes del footer -->
+    <div class="trust-block">
+      <p class="trust-text">
+        We don't sell anything directly.<br>
+        We only show products that already exist and that people use every day.<br>
+        You decide with complete freedom directly on Amazon.
+      </p>
+    </div>
+
     <footer class="site-footer">
       <p class="footer-text">
-        This site uses Amazon affiliate links. We may earn a commission from qualifying purchases at no extra cost to you.
+        This site uses Amazon affiliate links.<br>
+        If you decide to buy, we may receive a small commission at no extra cost to you.
+      </p>
+      <p class="footer-text">
+        Prices, shipping, availability, and returns<br>
+        are always confirmed directly on Amazon for full transparency.
       </p>
     </footer>
   </div>
