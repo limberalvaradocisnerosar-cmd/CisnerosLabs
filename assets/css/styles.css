@@ -196,7 +196,7 @@ a {
   display: flex;
   gap: 1.5rem;
   width: max-content;
-  animation: productsIntroScroll 25s linear infinite;
+  animation: productsIntroScroll 40s linear infinite;
 }
 
 .products-intro-marquee-inner:hover {
