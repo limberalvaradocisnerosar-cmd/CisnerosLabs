@@ -252,6 +252,9 @@ document.addEventListener("DOMContentLoaded", () => {
           borderRadius: 6,
         };
 
+        // Detect mobile
+        const isMobile = window.innerWidth <= 640;
+        
         clicksChartInstance = new Chart(ctx, {
           type: "bar",
           data: {
@@ -265,12 +268,13 @@ document.addEventListener("DOMContentLoaded", () => {
             plugins: {
               legend: {
                 display: true,
-                position: "right",
+                position: isMobile ? "bottom" : "right",
                 labels: {
                   color: "#e5e7eb",
-                  font: { size: 11 },
+                  font: { size: isMobile ? 10 : 11 },
                   usePointStyle: true,
-                  padding: 12,
+                  padding: isMobile ? 8 : 12,
+                  boxWidth: isMobile ? 10 : 12,
                   filter: function(legendItem, chartData) {
                     // Show only legend items (skip first dataset, show the rest)
                     return legendItem.datasetIndex > 0;
@@ -378,11 +382,19 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             scales: {
               x: {
-                ticks: { color: "#e5e7eb", font: { size: 11 } },
+                ticks: { 
+                  color: "#e5e7eb", 
+                  font: { size: window.innerWidth <= 640 ? 12 : 11 } 
+                },
                 grid: { display: false },
               },
               y: {
-                ticks: { color: "#9ca3af", stepSize: 1, precision: 0 },
+                ticks: { 
+                  color: "#9ca3af", 
+                  stepSize: 1, 
+                  precision: 0,
+                  font: { size: window.innerWidth <= 640 ? 11 : 10 }
+                },
                 grid: { color: "rgba(148, 163, 184, 0.2)" },
                 beginAtZero: true,
               },
