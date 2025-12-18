@@ -67,14 +67,13 @@ CREATE POLICY "Anyone can insert clicks"
 ON clicks FOR INSERT
 WITH CHECK (true);
 
--- Policy: Solo el admin puede ver los clicks (opcional, si quieres restringir)
--- Si quieres que solo el admin vea los clicks, usa esta policy:
-CREATE POLICY "Only authenticated users can view clicks"
+-- Policy: Permitir SELECT para usuarios autenticados (necesario para el dashboard)
+CREATE POLICY "Authenticated users can view clicks"
 ON clicks FOR SELECT
 USING (auth.role() = 'authenticated');
 ```
 
-**Nota:** Si usas la última policy, necesitarás que el admin esté autenticado en Supabase Auth para ver los clicks en el dashboard.
+**IMPORTANTE:** El dashboard necesita que el usuario esté autenticado para ver los clicks. Asegúrate de crear esta policy de SELECT para usuarios autenticados.
 
 ## 👤 Autenticación (Para el Admin Dashboard)
 

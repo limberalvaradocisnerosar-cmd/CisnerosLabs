@@ -82,72 +82,96 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadDashboardData() {
-    // 1) Load products
-    const { data: products, error: productsError } = await supabase
-      .from("products")
-      .select("id, name");
+    // Show loading state
+    totalClicksEl.textContent = "Loading...";
+    clicksTodayEl.textContent = "Loading...";
+    clicksWeekEl.textContent = "Loading...";
+    topProductEl.textContent = "Loading...";
+    tableBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-slate-400'>Loading...</td></tr>";
 
-    if (productsError) {
-      console.error("Error loading products:", productsError);
-      return;
-    }
+    try {
+      // 1) Load products
+      const { data: products, error: productsError } = await supabase
+        .from("products")
+        .select("id, name");
 
-    const productMap = new Map();
-    products.forEach((p) => {
-      productMap.set(p.id, p.name);
-    });
+      if (productsError) {
+        console.error("Error loading products:", productsError);
+        totalClicksEl.textContent = "Error";
+        tableBody.innerHTML = `<tr><td colspan='4' class='text-center py-4 text-red-400'>Error loading products: ${productsError.message}</td></tr>`;
+        return;
+      }
 
-    // 2) Load all clicks with timestamps
-    const { data: clicks, error: clicksError } = await supabase
-      .from("clicks")
-      .select("product_id, created_at")
-      .order("created_at", { ascending: false });
+      if (!products || products.length === 0) {
+        totalClicksEl.textContent = "0";
+        clicksTodayEl.textContent = "0";
+        clicksWeekEl.textContent = "0";
+        topProductEl.textContent = "No products";
+        tableBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No products found</td></tr>";
+        return;
+      }
 
-    if (clicksError) {
-      console.error("Error loading clicks:", clicksError);
-      return;
-    }
-
-    if (!clicks || clicks.length === 0) {
-      totalClicksEl.textContent = "0";
-      clicksTodayEl.textContent = "0";
-      clicksWeekEl.textContent = "0";
-      topProductEl.textContent = "No clicks yet";
-      tableBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No data available</td></tr>";
-      return;
-    }
-
-    // 3) Calculate metrics
-    const totalClicks = clicks.length;
-    const todayStart = getTodayStart();
-    const weekStart = getWeekStart();
-
-    const clicksToday = clicks.filter(
-      (c) => c.created_at >= todayStart
-    ).length;
-
-    const clicksWeek = clicks.filter(
-      (c) => c.created_at >= weekStart
-    ).length;
-
-    // 4) Calculate clicks per product
-    const productStats = new Map();
-
-    products.forEach((product) => {
-      const productClicks = clicks.filter((c) => c.product_id === product.id);
-      const total = productClicks.length;
-      const today = productClicks.filter((c) => c.created_at >= todayStart).length;
-      const lastClick = productClicks.length > 0
-        ? productClicks[0].created_at
-        : null;
-
-      productStats.set(product.id, {
-        name: product.name,
-        total,
-        today,
-        lastClick,
+      const productMap = new Map();
+      products.forEach((p) => {
+        productMap.set(p.id, p.name);
       });
-    });
+
+      // 2) Load all clicks with timestamps
+      const { data: clicks, error: clicksError } = await supabase
+        .from("clicks")
+        .select("product_id, created_at")
+        .order("created_at", { ascending: false });
+
+      if (clicksError) {
+        console.error("Error loading clicks:", clicksError);
+        totalClicksEl.textContent = "Error";
+        tableBody.innerHTML = `<tr><td colspan='4' class='text-center py-4 text-red-400'>Error loading clicks: ${clicksError.message}</td></tr>`;
+        return;
+      }
+
+      if (!clicks || clicks.length === 0) {
+        totalClicksEl.textContent = "0";
+        clicksTodayEl.textContent = "0";
+        clicksWeekEl.textContent = "0";
+        topProductEl.textContent = "No clicks yet";
+        tableBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No clicks registered yet</td></tr>";
+        return;
+      }
+
+      // 3) Calculate metrics
+      const totalClicks = clicks.length;
+      const todayStart = getTodayStart();
+      const weekStart = getWeekStart();
+
+      const clicksToday = clicks.filter(
+        (c) => c.created_at >= todayStart
+      ).length;
+
+      const clicksWeek = clicks.filter(
+        (c) => c.created_at >= weekStart
+      ).length;
+
+      // 4) Calculate clicks per product
+      const productStats = new Map();
+
+      products.forEach((product) => {
+        const productClicks = clicks.filter((c) => c.product_id === product.id);
+        const sortedClicks = productClicks.sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        const total = productClicks.length;
+        const today = productClicks.filter((c) => c.created_at >= todayStart).length;
+        const lastClick = sortedClicks.length > 0
+          ? sortedClicks[0].created_at
+          : null;
+
+        productStats.set(product.id, {
+          name: product.name,
+          total,
+          today,
+          lastClick,
+        });
+      });
 
     // 5) Find top product
     let topProduct = { name: "None", count: 0 };
@@ -157,46 +181,46 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 6) Update overview cards
-    totalClicksEl.textContent = totalClicks.toLocaleString();
-    clicksTodayEl.textContent = clicksToday.toLocaleString();
-    clicksWeekEl.textContent = clicksWeek.toLocaleString();
-    topProductEl.textContent = `${topProduct.name} (${topProduct.count})`;
+      // 6) Update overview cards
+      totalClicksEl.textContent = totalClicks.toLocaleString();
+      clicksTodayEl.textContent = clicksToday.toLocaleString();
+      clicksWeekEl.textContent = clicksWeek.toLocaleString();
+      topProductEl.textContent = `${topProduct.name} (${topProduct.count})`;
 
-    // 7) Build table
-    const tableRows = Array.from(productStats.values())
-      .sort((a, b) => b.total - a.total)
-      .map(
-        (stats) => `
-      <tr class="border-b border-slate-800/60 last:border-0">
-        <td class="py-2 pr-4 text-left">${stats.name}</td>
-        <td class="py-2 px-2 text-right font-semibold">${stats.total}</td>
-        <td class="py-2 px-2 text-right">${stats.today}</td>
-        <td class="py-2 pl-2 text-right text-slate-400 text-xs">${
-          stats.lastClick ? formatDate(stats.lastClick) : "—"
-        }</td>
-      </tr>
-    `
-      )
-      .join("");
-
-    tableBody.innerHTML = tableRows || "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No data</td></tr>";
-
-    // 8) Clicks per product chart
-    const ctx = document.getElementById("clicks-chart");
-    if (ctx) {
-      const labels = Array.from(productStats.values())
+      // 7) Build table
+      const tableRows = Array.from(productStats.values())
         .sort((a, b) => b.total - a.total)
-        .map((s) => s.name);
-      const dataValues = Array.from(productStats.values())
-        .sort((a, b) => b.total - a.total)
-        .map((s) => s.total);
+        .map(
+          (stats) => `
+        <tr class="border-b border-slate-800/60 last:border-0">
+          <td class="py-2 pr-4 text-left">${stats.name}</td>
+          <td class="py-2 px-2 text-right font-semibold">${stats.total}</td>
+          <td class="py-2 px-2 text-right">${stats.today}</td>
+          <td class="py-2 pl-2 text-right text-slate-400 text-xs">${
+            stats.lastClick ? formatDate(stats.lastClick) : "—"
+          }</td>
+        </tr>
+      `
+        )
+        .join("");
 
-      if (clicksChartInstance) {
-        clicksChartInstance.destroy();
-      }
+      tableBody.innerHTML = tableRows || "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No data</td></tr>";
 
-      clicksChartInstance = new Chart(ctx, {
+      // 8) Clicks per product chart
+      const ctx = document.getElementById("clicks-chart");
+      if (ctx) {
+        const labels = Array.from(productStats.values())
+          .sort((a, b) => b.total - a.total)
+          .map((s) => s.name);
+        const dataValues = Array.from(productStats.values())
+          .sort((a, b) => b.total - a.total)
+          .map((s) => s.total);
+
+        if (clicksChartInstance) {
+          clicksChartInstance.destroy();
+        }
+
+        clicksChartInstance = new Chart(ctx, {
         type: "bar",
         data: {
           labels,
@@ -228,12 +252,12 @@ document.addEventListener("DOMContentLoaded", () => {
             },
           },
         },
-      });
-    }
+        });
+      }
 
-    // 9) Daily clicks chart (last 7 days)
-    const dailyCtx = document.getElementById("daily-chart");
-    if (dailyCtx) {
+      // 9) Daily clicks chart (last 7 days)
+      const dailyCtx = document.getElementById("daily-chart");
+      if (dailyCtx) {
       const last7Days = [];
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
@@ -292,7 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
             },
           },
         },
-      });
+        });
+      }
+    } catch (err) {
+      console.error("Unexpected error loading dashboard:", err);
+      totalClicksEl.textContent = "Error";
+      tableBody.innerHTML = `<tr><td colspan='4' class='text-center py-4 text-red-400'>Unexpected error: ${err.message}</td></tr>`;
     }
   }
 
