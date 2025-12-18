@@ -74,7 +74,62 @@
 
     <!-- Sección productos (rellenada por products.js desde Supabase) -->
     <section id="products-section">
-      <main id="products" class="products-grid"></main>
+      <main id="products" class="products-grid">
+        <!-- Fallback: productos de ejemplo con descripciones (se reemplazan por JS si Supabase funciona) -->
+        <article class="product-card">
+          <div class="product-image-wrap">
+            <img
+              src="/assets/images/smartplugwifi.jpg"
+              class="product-image"
+              loading="lazy"
+              alt="Smart Plug Wi-Fi"
+            >
+          </div>
+          <p class="product-description">Siempre dejás cosas enchufadas sin darte cuenta.<br>Este enchufe te deja controlarlo todo desde el celular.<br>Una vez que lo usás, no volvés atrás.</p>
+          <button
+            type="button"
+            class="product-cta track-click"
+          >
+            <span>View on Amazon →</span>
+          </button>
+        </article>
+
+        <article class="product-card">
+          <div class="product-image-wrap">
+            <img
+              src="/assets/images/girador360.jpg"
+              class="product-image"
+              loading="lazy"
+              alt="360° Rotating Organizer"
+            >
+          </div>
+          <p class="product-description">Cajones desordenados que te hacen perder tiempo todos los días.<br>Este organizador hace visible todo de un solo vistazo.<br>Mirá por qué la gente lo usa más de lo que esperaba.</p>
+          <button
+            type="button"
+            class="product-cta track-click"
+          >
+            <span>View on Amazon →</span>
+          </button>
+        </article>
+
+        <article class="product-card">
+          <div class="product-image-wrap">
+            <img
+              src="/assets/images/organizasorAuto.jpg"
+              class="product-image"
+              loading="lazy"
+              alt="Car Seat Gap Organizer"
+            >
+          </div>
+          <p class="product-description">Objetos que se pierden entre los asientos constantemente.<br>Una solución simple que evita distracciones al manejar.<br>En Amazon se ve claro cómo funciona.</p>
+          <button
+            type="button"
+            class="product-cta track-click"
+          >
+            <span>View on Amazon →</span>
+          </button>
+        </article>
+      </main>
     </section>
 
     <footer class="site-footer">

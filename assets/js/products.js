@@ -89,5 +89,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     .join("");
 
+  // Limpiar contenido existente (fallback) y reemplazar con productos de Supabase
   container.innerHTML = cardsHtml;
 });
