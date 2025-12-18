@@ -1,4 +1,4 @@
-# 🚀 Guía Completa: Configuración Supabase + Despliegue Vercel
+ # 🚀 Guía Completa: Configuración Supabase + Despliegue Vercel
 
 ## 📋 Índice
 1. [Crear Proyecto en Supabase](#1-crear-proyecto-en-supabase)
