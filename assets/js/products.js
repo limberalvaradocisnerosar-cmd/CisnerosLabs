@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               alt="${productName}"
             >
           </div>
-          <p class="product-description">${description}</p>
+          <p class="product-description"><strong>${productName}</strong><br>${description}</p>
           <a
             href="/go.html?id=${product.id}"
             class="product-cta"

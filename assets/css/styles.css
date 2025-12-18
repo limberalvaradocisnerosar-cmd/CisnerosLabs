@@ -326,6 +326,20 @@ a {
   transform: scale(1.05) !important;
 }
 
+.product-description strong {
+  font-weight: 700 !important;
+  color: #111827 !important;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .product-description strong {
+    font-size: 1.1rem;
+  }
+}
+
 .product-description {
   font-size: 1rem !important;
   font-weight: 400 !important;
