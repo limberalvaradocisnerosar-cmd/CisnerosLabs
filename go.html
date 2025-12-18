@@ -20,7 +20,7 @@
 
       if (!window.supabaseClient) {
         console.error('Supabase client not initialized');
-        window.location.href = '/';
+        window.location.replace('/');
         return;
       }
 
@@ -29,7 +29,7 @@
       const productId = urlParams.get('id');
       
       if (!productId) {
-        window.location.href = '/';
+        window.location.replace('/');
         return;
       }
 
@@ -47,7 +47,7 @@
 
         if (productError || !product || !product.affiliate_url) {
           console.error('Product not found:', productError);
-          window.location.href = '/';
+          window.location.replace('/');
           return;
         }
 
@@ -69,10 +69,11 @@
           });
 
         // Redirect immediately (don't wait for tracking)
-        window.location.href = product.affiliate_url;
+        // Use replace() to avoid leaving go.html in browser history
+        window.location.replace(product.affiliate_url);
       } catch (err) {
         console.error('Error:', err);
-        window.location.href = '/';
+        window.location.replace('/');
       }
     })();
   </script>

@@ -206,116 +206,188 @@ document.addEventListener("DOMContentLoaded", () => {
 
       tableBody.innerHTML = tableRows || "<tr><td colspan='4' class='text-center py-4 text-slate-400'>No data</td></tr>";
 
-      // 8) Clicks per product chart
+      // 8) Clicks per product chart (with unique colors per product)
       const ctx = document.getElementById("clicks-chart");
       if (ctx) {
-        const labels = Array.from(productStats.values())
-          .sort((a, b) => b.total - a.total)
-          .map((s) => s.name);
-        const dataValues = Array.from(productStats.values())
-          .sort((a, b) => b.total - a.total)
-          .map((s) => s.total);
+        const sortedProducts = Array.from(productStats.values())
+          .sort((a, b) => b.total - a.total);
+
+        // Generate unique colors for each product
+        const colors = [
+          { bg: "rgba(248, 113, 22, 0.7)", border: "rgba(248, 113, 22, 1)" }, // Orange
+          { bg: "rgba(34, 197, 94, 0.7)", border: "rgba(34, 197, 94, 1)" }, // Green
+          { bg: "rgba(59, 130, 246, 0.7)", border: "rgba(59, 130, 246, 1)" }, // Blue
+          { bg: "rgba(168, 85, 247, 0.7)", border: "rgba(168, 85, 247, 1)" }, // Purple
+          { bg: "rgba(236, 72, 153, 0.7)", border: "rgba(236, 72, 153, 1)" }, // Pink
+          { bg: "rgba(251, 146, 60, 0.7)", border: "rgba(251, 146, 60, 1)" }, // Amber
+        ];
+
+        // Prepare data: one dataset with array of colors for each bar
+        const productData = sortedProducts.map(p => p.total);
+        const productBgColors = sortedProducts.map((p, index) => colors[index % colors.length].bg);
+        const productBorderColors = sortedProducts.map((p, index) => colors[index % colors.length].border);
 
         if (clicksChartInstance) {
           clicksChartInstance.destroy();
         }
 
+        // Create one dataset per product for legend (hidden bars, only for legend)
+        const legendDatasets = sortedProducts.map((product, index) => ({
+          label: product.name,
+          data: Array(sortedProducts.length).fill(0),
+          backgroundColor: colors[index % colors.length].bg,
+          borderColor: colors[index % colors.length].border,
+          borderWidth: 1.5,
+          borderRadius: 6,
+          hidden: true, // Hide these bars, only show in legend
+        }));
+
+        // Main dataset with all data and colors
+        const mainDataset = {
+          label: "Clicks",
+          data: productData,
+          backgroundColor: productBgColors,
+          borderColor: productBorderColors,
+          borderWidth: 1.5,
+          borderRadius: 6,
+        };
+
         clicksChartInstance = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Clicks",
-              data: dataValues,
-              backgroundColor: "rgba(248, 113, 22, 0.7)",
-              borderColor: "rgba(248, 113, 22, 1)",
-              borderWidth: 1.5,
-              borderRadius: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
+          type: "bar",
+          data: {
+            labels: Array(sortedProducts.length).fill(""), // Empty labels to hide Y-axis
+            datasets: [mainDataset, ...legendDatasets],
           },
-          scales: {
-            x: {
-              ticks: { color: "#e5e7eb", font: { size: 10 } },
-              grid: { display: false },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: "y", // Horizontal bars
+            plugins: {
+              legend: {
+                display: true,
+                position: "right",
+                labels: {
+                  color: "#e5e7eb",
+                  font: { size: 11 },
+                  usePointStyle: true,
+                  padding: 12,
+                  filter: function(legendItem, chartData) {
+                    // Show only legend items (skip first dataset, show the rest)
+                    return legendItem.datasetIndex > 0;
+                  },
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  title: function() {
+                    return '';
+                  },
+                  label: function(context) {
+                    if (context.datasetIndex === 0) {
+                      const index = context.dataIndex;
+                      const product = sortedProducts[index];
+                      return product.name + ': ' + context.parsed.x + ' clicks';
+                    }
+                    return '';
+                  }
+                }
+              }
             },
-            y: {
-              ticks: { color: "#9ca3af", stepSize: 1, precision: 0 },
-              grid: { color: "rgba(148, 163, 184, 0.2)" },
+            scales: {
+              x: {
+                ticks: { 
+                  color: "#9ca3af", 
+                  stepSize: 1, 
+                  precision: 0,
+                  display: true,
+                },
+                grid: { color: "rgba(148, 163, 184, 0.2)" },
+                beginAtZero: true,
+              },
+              y: {
+                ticks: { 
+                  color: "#e5e7eb", 
+                  font: { size: 10 },
+                  display: false, // Hide Y-axis labels
+                },
+                grid: { display: false },
+              },
             },
           },
-        },
         });
       }
 
-      // 9) Daily clicks chart (last 7 days)
+      // 9) Daily clicks chart (last 7 days) - Show only day numbers
       const dailyCtx = document.getElementById("daily-chart");
       if (dailyCtx) {
-      const last7Days = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        last7Days.push(date.toISOString());
-      }
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          date.setHours(0, 0, 0, 0);
+          last7Days.push(date.toISOString());
+        }
 
-      const dailyCounts = last7Days.map((dayStart) => {
-        const dayEnd = new Date(dayStart);
-        dayEnd.setHours(23, 59, 59, 999);
-        return clicks.filter(
-          (c) => c.created_at >= dayStart && c.created_at <= dayEnd.toISOString()
-        ).length;
-      });
+        const dailyCounts = last7Days.map((dayStart) => {
+          const dayEnd = new Date(dayStart);
+          dayEnd.setHours(23, 59, 59, 999);
+          return clicks.filter(
+            (c) => c.created_at >= dayStart && c.created_at <= dayEnd.toISOString()
+          ).length;
+        });
 
-      const dailyLabels = last7Days.map((d) => {
-        const date = new Date(d);
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      });
+        // Show only day numbers (12, 13, 14, etc.)
+        const dailyLabels = last7Days.map((d) => {
+          const date = new Date(d);
+          return date.getDate().toString(); // Just the day number
+        });
 
-      if (dailyChartInstance) {
-        dailyChartInstance.destroy();
-      }
+        // Get current month name for display
+        const currentMonth = new Date().toLocaleDateString("en-US", { month: "long" });
 
-      dailyChartInstance = new Chart(dailyCtx, {
-        type: "bar",
-        data: {
-          labels: dailyLabels,
-          datasets: [
-            {
-              label: "Clicks",
-              data: dailyCounts,
-              backgroundColor: "rgba(34, 197, 94, 0.7)",
-              borderColor: "rgba(34, 197, 94, 1)",
-              borderWidth: 1.5,
-              borderRadius: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
+        if (dailyChartInstance) {
+          dailyChartInstance.destroy();
+        }
+
+        // Update chart title with current month
+        const dailyChartTitle = document.getElementById("daily-chart-title");
+        if (dailyChartTitle) {
+          dailyChartTitle.textContent = `Clicks per Day (Last 7 Days) - ${currentMonth}`;
+        }
+
+        dailyChartInstance = new Chart(dailyCtx, {
+          type: "bar",
+          data: {
+            labels: dailyLabels,
+            datasets: [
+              {
+                label: "Clicks",
+                data: dailyCounts,
+                backgroundColor: "rgba(34, 197, 94, 0.7)",
+                borderColor: "rgba(34, 197, 94, 1)",
+                borderWidth: 1.5,
+                borderRadius: 6,
+              },
+            ],
           },
-          scales: {
-            x: {
-              ticks: { color: "#e5e7eb", font: { size: 10 } },
-              grid: { display: false },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
             },
-            y: {
-              ticks: { color: "#9ca3af", stepSize: 1, precision: 0 },
-              grid: { color: "rgba(148, 163, 184, 0.2)" },
-              beginAtZero: true,
+            scales: {
+              x: {
+                ticks: { color: "#e5e7eb", font: { size: 11 } },
+                grid: { display: false },
+              },
+              y: {
+                ticks: { color: "#9ca3af", stepSize: 1, precision: 0 },
+                grid: { color: "rgba(148, 163, 184, 0.2)" },
+                beginAtZero: true,
+              },
             },
           },
-        },
         });
       }
     } catch (err) {
