@@ -1,888 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Analytics</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    
-    <!-- Preconnect para recursos externos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- Supabase JS Client CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Cargar configuración desde API (variables de entorno de Vercel) -->
-    <script>
-        // Cargar configuración desde endpoint API
-        // Las variables de entorno se configuran en: Vercel Dashboard → Settings → Environment Variables
-        async function loadConfig() {
-            try {
-                const response = await fetch('/api/config');
-                const config = await response.json();
-                
-                // Guardar en window para uso global
-                window.SUPABASE_URL = config.supabaseUrl || 'YOUR_SUPABASE_URL';
-                window.SUPABASE_ANON_KEY = config.supabaseAnonKey || 'YOUR_SUPABASE_ANON_KEY';
-                window.ALLOWED_EMAIL = config.allowedEmail || 'admin@example.com';
-                
-                // Inicializar app después de cargar la config
-                if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && 
-                    window.SUPABASE_URL !== 'YOUR_SUPABASE_URL' && 
-                    window.SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                    initializeApp();
-                } else {
-                    console.warn('⚠️ Supabase credentials not configured. Please set environment variables in Vercel.');
-                    showError('Configuration error. Please check environment variables in Vercel.');
-                }
-            } catch (error) {
-                console.error('Error loading config:', error);
-                // Fallback: intentar usar valores por defecto si la API falla
-                window.SUPABASE_URL = 'YOUR_SUPABASE_URL';
-                window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-                window.ALLOWED_EMAIL = 'admin@example.com';
-                showError('Error loading configuration. Please check your deployment.');
-            }
-        }
-        
-        // Iniciar carga de configuración
-        loadConfig();
-    </script>
-    
-    <style>
-        /* Tipografía personalizada */
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Colores personalizados tipo Apple */
-        .text-apple-gray {
-            color: #86868b;
-        }
-        
-        .bg-apple-light {
-            background-color: #f5f5f7;
-        }
-        
-        /* Animación fade-in */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        /* Sombra suave premium */
-        .shadow-premium {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Transiciones suaves */
-        .transition-smooth {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        /* Loading spinner */
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #dc2626;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Amazon · Admin</title>
+
+  <!-- Tailwind (opcional, sólo utilidades) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- CSS específico de admin -->
+  <link rel="stylesheet" href="/assets/css/styles-admin.css" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js para gráficos simples -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- JS -->
+  <script defer src="/assets/js/supabase.js"></script>
+  <script defer src="/assets/js/admin.js"></script>
+
+  <link rel="icon" href="/assets/favicon.ico" />
 </head>
-<body class="bg-apple-light antialiased min-h-screen">
-    
-    <!-- ============================================
-         PANTALLA DE LOGIN
-         ============================================ -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4 py-12">
-        <div class="w-full max-w-md">
-            <div class="bg-white rounded-3xl shadow-premium p-8 sm:p-10 fade-in">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-                        Admin Dashboard
-                    </h1>
-                    <p class="text-apple-gray text-sm sm:text-base">
-                        Sign in to view analytics
-                    </p>
-                </div>
-                
-                <!-- Error message -->
-                <div id="loginError" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <p class="text-sm text-red-600 text-center"></p>
-                </div>
-                
-                <!-- Login Form -->
-                <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-smooth"
-                            placeholder="your@email.com"
-                        >
-                    </div>
-                    
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-smooth"
-                            placeholder="••••••••"
-                        >
-                    </div>
-                    
-                    <button
-                        type="submit"
-                        id="loginButton"
-                        class="w-full px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-smooth shadow-lg hover:shadow-xl"
-                    >
-                        Sign In
-                    </button>
-                </form>
-            </div>
+
+<body>
+  <div class="admin-shell">
+    <!-- Vista de login -->
+    <section id="login-view" class="space-y-6">
+      <header class="admin-header">
+        <div>
+          <h1 class="admin-title">Mini Amazon · Panel privado</h1>
+          <p class="admin-subtitle">
+            Accede con tu cuenta autorizada para ver el rendimiento de los productos.
+          </p>
         </div>
-    </div>
-    
-    <!-- ============================================
-         DASHBOARD (oculto inicialmente)
-         ============================================ -->
-    <div id="dashboardScreen" class="hidden min-h-screen px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        
-        <!-- Header -->
-        <header class="max-w-7xl mx-auto mb-8 sm:mb-12">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-2 tracking-tight">
-                        Analytics Dashboard
-                    </h1>
-                    <p class="text-apple-gray text-sm sm:text-base">
-                        Click tracking and product performance
-                    </p>
-                </div>
-                <button
-                    onclick="handleLogout()"
-                    class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-smooth"
-                >
-                    Sign Out
-                </button>
-            </div>
-        </header>
-        
-        <!-- Loading State -->
-        <div id="dashboardLoading" class="max-w-7xl mx-auto text-center py-20">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-apple-gray">Loading analytics...</p>
+        <span class="admin-pill">Solo email autorizado</span>
+      </header>
+
+      <form id="login-form" class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 space-y-4 max-w-md">
+        <div>
+          <label for="email" class="block text-xs font-medium text-slate-300 mb-1">
+            Email de administrador
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="tu-email@ejemplo.com"
+          />
         </div>
-        
-        <!-- Dashboard Content -->
-        <div id="dashboardContent" class="hidden max-w-7xl mx-auto space-y-8 sm:space-y-12">
-            
-            <!-- Total Clicks Card -->
-            <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Total Clicks</h2>
-                <div class="text-4xl sm:text-5xl md:text-6xl font-bold text-red-600" id="totalClicks">
-                    0
-                </div>
-            </div>
-            
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                <!-- Clicks by Day Chart -->
-                <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Clicks by Day</h2>
-                    <div class="relative h-64 sm:h-80">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Clicks by Product Bar Chart -->
-                <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Clicks by Product</h2>
-                    <div class="relative h-64 sm:h-80">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Additional Chart Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                <!-- Donut Chart -->
-                <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Distribution</h2>
-                    <div class="relative h-64 sm:h-80">
-                        <canvas id="donutChart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Recent Activity (opcional) -->
-                <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Last 7 Days</h2>
-                    <div class="relative h-64 sm:h-80">
-                        <canvas id="recentDaysChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Products Table -->
-            <div class="bg-white rounded-3xl shadow-premium p-6 sm:p-8 fade-in overflow-x-auto">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Product Performance</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left py-4 px-4 text-sm font-semibold text-apple-gray uppercase tracking-wider">Product</th>
-                                <th class="text-left py-4 px-4 text-sm font-semibold text-apple-gray uppercase tracking-wider">Category</th>
-                                <th class="text-right py-4 px-4 text-sm font-semibold text-apple-gray uppercase tracking-wider">Clicks</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody" class="divide-y divide-gray-100">
-                            <!-- Table rows will be inserted here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
+        <div>
+          <label for="password" class="block text-xs font-medium text-slate-300 mb-1">
+            Contraseña
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="••••••••"
+          />
         </div>
-        
-    </div>
-    
-    <!-- JavaScript para Supabase y Dashboard -->
-    <script>
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
-        let supabase = null;
-        let ALLOWED_EMAIL = null;
-        
-        // ============================================
-        // INICIALIZACIÓN DE LA APP
-        // ============================================
-        function initializeApp() {
-            // Obtener credenciales desde window (cargadas por loadConfig)
-            const SUPABASE_URL = window.SUPABASE_URL;
-            const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
-            ALLOWED_EMAIL = window.ALLOWED_EMAIL;
-            
-            // Validar que las credenciales estén configuradas
-            if (!SUPABASE_URL || !SUPABASE_ANON_KEY || 
-                SUPABASE_URL === 'YOUR_SUPABASE_URL' || 
-                SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-                console.error('⚠️ Supabase credentials not configured. Please set environment variables in Vercel.');
-                showError('Configuration error. Please check environment variables in Vercel.');
-                return;
-            }
-            
-            // Inicializar cliente Supabase
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // Verificar si el usuario ya está autenticado
-            checkAuth();
-        }
-        
-        // Variables globales para gráficos
-        let barChart = null;
-        let donutChart = null;
-        let lineChart = null;
-        let recentDaysChart = null;
-        
-        // ============================================
-        // FUNCIONES DE AUTENTICACIÓN
-        // ============================================
-        
-        /**
-         * Manejar login
-         */
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('loginButton');
-            const errorDiv = document.getElementById('loginError');
-            
-            // Reset error
-            errorDiv.classList.add('hidden');
-            loginButton.disabled = true;
-            loginButton.textContent = 'Signing in...';
-            
-            try {
-                // Sign in con Supabase Auth
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) {
-                    throw error;
-                }
-                
-                // Verificar que el email sea el permitido
-                if (data.user.email !== ALLOWED_EMAIL) {
-                    await supabase.auth.signOut();
-                    throw new Error('Access denied. Only authorized users can access this dashboard.');
-                }
-                
-                // Login exitoso - mostrar dashboard
-                showDashboard();
-                
-            } catch (error) {
-                // Mostrar error
-                const errorText = errorDiv.querySelector('p');
-                errorText.textContent = error.message || 'Invalid email or password';
-                errorDiv.classList.remove('hidden');
-                loginButton.disabled = false;
-                loginButton.textContent = 'Sign In';
-            }
-        }
-        
-        /**
-         * Manejar logout
-         */
-        async function handleLogout() {
-            try {
-                await supabase.auth.signOut();
-                showLogin();
-            } catch (error) {
-                console.error('Logout error:', error);
-                // Forzar logout local
-                showLogin();
-            }
-        }
-        
-        /**
-         * Verificar sesión existente
-         */
-        async function checkSession() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                
-                if (session && session.user && session.user.email === ALLOWED_EMAIL) {
-                    showDashboard();
-                } else {
-                    showLogin();
-                }
-            } catch (error) {
-                console.error('Session check error:', error);
-                showLogin();
-            }
-        }
-        
-        /**
-         * Mostrar pantalla de login
-         */
-        function showLogin() {
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('dashboardScreen').classList.add('hidden');
-        }
-        
-        /**
-         * Mostrar dashboard
-         */
-        function showDashboard() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-            loadAnalytics();
-        }
-        
-        // ============================================
-        // FUNCIONES DE ANALYTICS
-        // ============================================
-        
-        /**
-         * Cargar analytics desde Supabase
-         */
-        async function loadAnalytics() {
-            const loadingDiv = document.getElementById('dashboardLoading');
-            const contentDiv = document.getElementById('dashboardContent');
-            
-            loadingDiv.classList.remove('hidden');
-            contentDiv.classList.add('hidden');
-            
-            try {
-                // Cargar clicks con información de productos
-                const { data: clicks, error: clicksError } = await supabase
-                    .from('clicks')
-                    .select(`
-                        id,
-                        product_id,
-                        clicked_at,
-                        products (
-                            id,
-                            title,
-                            category
-                        )
-                    `)
-                    .order('clicked_at', { ascending: false });
-                
-                if (clicksError) {
-                    throw clicksError;
-                }
-                
-                // Cargar productos
-                const { data: products, error: productsError } = await supabase
-                    .from('products')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (productsError) {
-                    throw productsError;
-                }
-                
-                // Procesar datos
-                const analytics = processAnalytics(clicks || [], products || []);
-                
-                // Mostrar datos
-                displayAnalytics(analytics);
-                
-                loadingDiv.classList.add('hidden');
-                contentDiv.classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-                loadingDiv.innerHTML = `
-                    <div class="text-center">
-                        <p class="text-red-600 mb-4">Error loading analytics</p>
-                        <button onclick="loadAnalytics()" class="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">
-                            Retry
-                        </button>
-                    </div>
-                `;
-            }
-        }
-        
-        /**
-         * Procesar datos de analytics
-         */
-        function processAnalytics(clicks, products) {
-            // Contar clicks por producto
-            const clicksByProduct = {};
-            const clicksByDay = {};
-            let totalClicks = 0;
-            
-            clicks.forEach(click => {
-                if (click.product_id) {
-                    clicksByProduct[click.product_id] = (clicksByProduct[click.product_id] || 0) + 1;
-                    totalClicks++;
-                }
-                
-                // Agrupar por día
-                if (click.clicked_at) {
-                    const date = new Date(click.clicked_at);
-                    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-                    clicksByDay[dateKey] = (clicksByDay[dateKey] || 0) + 1;
-                }
-            });
-            
-            // Crear array de productos con clicks
-            const productsWithClicks = products.map(product => ({
-                ...product,
-                clicks: clicksByProduct[product.id] || 0
-            })).sort((a, b) => b.clicks - a.clicks);
-            
-            // Procesar clicks por día (últimos 30 días)
-            const last30Days = getLast30Days();
-            const clicksByDayArray = last30Days.map(day => ({
-                date: day,
-                clicks: clicksByDay[day] || 0
-            }));
-            
-            // Procesar últimos 7 días
-            const last7Days = getLast7Days();
-            const clicksLast7Days = last7Days.map(day => ({
-                date: day,
-                clicks: clicksByDay[day] || 0
-            }));
-            
-            return {
-                totalClicks,
-                productsWithClicks,
-                clicksByDay: clicksByDayArray,
-                clicksLast7Days: clicksLast7Days
-            };
-        }
-        
-        /**
-         * Obtener últimos 30 días
-         */
-        function getLast30Days() {
-            const days = [];
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                days.push(date.toISOString().split('T')[0]);
-            }
-            return days;
-        }
-        
-        /**
-         * Obtener últimos 7 días
-         */
-        function getLast7Days() {
-            const days = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                days.push(date.toISOString().split('T')[0]);
-            }
-            return days;
-        }
-        
-        /**
-         * Formatear fecha para mostrar
-         */
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        }
-        
-        /**
-         * Mostrar analytics en el dashboard
-         */
-        function displayAnalytics(analytics) {
-            // Total clicks
-            document.getElementById('totalClicks').textContent = analytics.totalClicks;
-            
-            // Preparar datos para gráficos de productos
-            const labels = analytics.productsWithClicks.map(p => p.title);
-            const clicks = analytics.productsWithClicks.map(p => p.clicks);
-            const colors = [
-                '#dc2626', // Red
-                '#ef4444', // Red light
-                '#f87171', // Red lighter
-                '#fca5a5', // Red lightest
-                '#fecaca', // Red very light
-                '#fee2e2'  // Red ultra light
-            ];
-            
-            // Crear/actualizar gráficos
-            createLineChart(analytics.clicksByDay); // Clicks por día (30 días)
-            createBarChart(labels, clicks, colors); // Clicks por producto
-            createDonutChart(labels, clicks, colors); // Distribución
-            createRecentDaysChart(analytics.clicksLast7Days); // Últimos 7 días
-            
-            // Mostrar tabla
-            displayTable(analytics.productsWithClicks);
-        }
-        
-        /**
-         * Crear gráfico de línea (clicks por día)
-         */
-        function createLineChart(clicksByDay) {
-            const ctx = document.getElementById('lineChart');
-            
-            if (lineChart) {
-                lineChart.destroy();
-            }
-            
-            const labels = clicksByDay.map(d => formatDate(d.date));
-            const data = clicksByDay.map(d => d.clicks);
-            
-            lineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Clicks',
-                        data: data,
-                        borderColor: '#dc2626',
-                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                        pointBackgroundColor: '#dc2626',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleFont: {
-                                size: 14,
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                size: 13
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Crear gráfico de barras (clicks por producto)
-         */
-        function createBarChart(labels, clicks, colors) {
-            const ctx = document.getElementById('barChart');
-            
-            if (barChart) {
-                barChart.destroy();
-            }
-            
-            barChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Clicks',
-                        data: clicks,
-                        backgroundColor: colors[0],
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Crear gráfico de últimos 7 días
-         */
-        function createRecentDaysChart(clicksLast7Days) {
-            const ctx = document.getElementById('recentDaysChart');
-            
-            if (recentDaysChart) {
-                recentDaysChart.destroy();
-            }
-            
-            const labels = clicksLast7Days.map(d => formatDate(d.date));
-            const data = clicksLast7Days.map(d => d.clicks);
-            
-            recentDaysChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Clicks',
-                        data: data,
-                        backgroundColor: [
-                            '#dc2626',
-                            '#ef4444',
-                            '#f87171',
-                            '#fca5a5',
-                            '#fecaca',
-                            '#fee2e2',
-                            '#fef2f2'
-                        ],
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Crear gráfico donut
-         */
-        function createDonutChart(labels, clicks, colors) {
-            const ctx = document.getElementById('donutChart');
-            
-            if (donutChart) {
-                donutChart.destroy();
-            }
-            
-            donutChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: clicks,
-                        backgroundColor: colors.slice(0, labels.length)
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-        
-        /**
-         * Mostrar tabla de productos
-         */
-        function displayTable(products) {
-            const tbody = document.getElementById('productsTableBody');
-            tbody.innerHTML = '';
-            
-            if (products.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="py-8 text-center text-apple-gray">
-                            No products found
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            products.forEach(product => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition-smooth';
-                row.innerHTML = `
-                    <td class="py-4 px-4">
-                        <div class="font-semibold text-gray-900">${product.title || 'N/A'}</div>
-                    </td>
-                    <td class="py-4 px-4">
-                        <span class="text-sm text-apple-gray">${product.category || 'N/A'}</span>
-                    </td>
-                    <td class="py-4 px-4 text-right">
-                        <span class="font-bold text-red-600">${product.clicks || 0}</span>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
-        
-        // Event listeners
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
-        
-        // Verificar sesión al cargar
-        checkSession();
-        
-        // Escuchar cambios de autenticación
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_OUT' || !session) {
-                showLogin();
-            } else if (event === 'SIGNED_IN' && session.user.email === ALLOWED_EMAIL) {
-                showDashboard();
-            }
-        });
-    </script>
+        <button
+          type="submit"
+          class="w-full inline-flex items-center justify-center rounded-lg bg-slate-100 text-slate-950 text-sm font-medium py-2.5 hover:bg-white transition-colors"
+        >
+          Entrar al panel
+        </button>
+        <p id="login-error" class="text-xs text-red-400 min-h-[1rem]"></p>
+      </form>
+    </section>
+
+    <!-- Vista de dashboard (solo visible tras login correcto) -->
+    <section id="dashboard-view" class="hidden space-y-6">
+      <header class="admin-header">
+        <div>
+          <h1 class="admin-title">Mini Amazon · Dashboard</h1>
+          <p class="admin-subtitle">
+            Clics en tiempo real desde la landing de productos.
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="admin-pill" id="admin-email-badge">Admin</span>
+          <button
+            id="logout-btn"
+            type="button"
+            class="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-slate-700 hover:bg-slate-800"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </header>
+
+      <main class="admin-grid">
+        <section class="admin-card">
+          <p class="admin-card-label">Total clics registrados</p>
+          <p id="total-clicks" class="admin-card-value">—</p>
+        </section>
+
+        <section class="admin-card">
+          <p class="admin-card-label">Productos con más interacción</p>
+          <div class="mt-3 max-h-40 overflow-y-auto pr-1">
+            <table class="w-full text-xs text-slate-200/90">
+              <thead class="text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="text-left py-1 font-normal">Producto</th>
+                  <th class="text-right py-1 font-normal">Clics</th>
+                </tr>
+              </thead>
+              <tbody id="clicks-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-card col-span-full">
+          <p class="admin-card-label mb-2">Distribución de clics por producto</p>
+          <div class="h-48">
+            <canvas id="clicks-chart"></canvas>
+          </div>
+        </section>
+      </main>
+
+      <footer class="admin-footer">
+        Datos en tiempo real desde Supabase · Tablas <code>products</code> y <code>clicks</code>.
+      </footer>
+    </section>
+  </div>
 </body>
 </html>
-

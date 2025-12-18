@@ -1,588 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday Amazon Finds - Smart Gifts</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    
-    <!-- Preconnect para recursos externos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter (tipografía moderna tipo Apple) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Supabase JS Client CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Cargar configuración desde API (variables de entorno de Vercel) -->
-    <script>
-        // Cargar configuración desde endpoint API
-        // Las variables de entorno se configuran en: Vercel Dashboard → Settings → Environment Variables
-        async function loadConfig() {
-            try {
-                const response = await fetch('/api/config');
-                const config = await response.json();
-                
-                // Guardar en window para uso global
-                window.SUPABASE_URL = config.supabaseUrl || 'YOUR_SUPABASE_URL';
-                window.SUPABASE_ANON_KEY = config.supabaseAnonKey || 'YOUR_SUPABASE_ANON_KEY';
-                
-                // Inicializar Supabase después de cargar la config
-                if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && 
-                    window.SUPABASE_URL !== 'YOUR_SUPABASE_URL' && 
-                    window.SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                    initializeApp();
-                } else {
-                    console.warn('⚠️ Supabase credentials not configured. Please set environment variables in Vercel.');
-                    showError();
-                }
-            } catch (error) {
-                console.error('Error loading config:', error);
-                // Fallback: intentar usar valores por defecto si la API falla
-                window.SUPABASE_URL = 'YOUR_SUPABASE_URL';
-                window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-                showError();
-            }
-        }
-        
-        // Iniciar carga de configuración
-        loadConfig();
-    </script>
-    
-    <style>
-        /* Tipografía personalizada */
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* ============================================
-           ANIMACIÓN HERO SPLASH SCREEN - Tipo Apple
-           ============================================ */
-        @keyframes fadeScaleIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.92);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        @keyframes fadeScaleOut {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.94);
-                pointer-events: none;
-            }
-        }
-        
-        .hero-splash {
-            animation: fadeScaleIn 0.6s ease-out forwards, fadeScaleOut 0.5s ease-in 1.5s forwards;
-            will-change: opacity, transform;
-        }
-        
-        /* Animación del ícono navideño */
-        @keyframes gentlePulse {
-            0%, 100% {
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                transform: scale(1.1) rotate(-5deg);
-            }
-        }
-        
-        .christmas-icon {
-            animation: gentlePulse 3s ease-in-out infinite;
-            animation-delay: 0.3s;
-            will-change: transform;
-        }
-        
-        /* Animación fade-in del contenido principal */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 1s ease-out forwards;
-        }
-        
-        /* Hover suave en productos - optimizado */
-        .product-card {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: transform;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-8px);
-        }
-        
-        .product-image {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: transform;
-        }
-        
-        .product-card:hover .product-image {
-            transform: scale(1.03);
-        }
-        
-        /* Botón CTA optimizado */
-        .cta-button {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            will-change: transform, box-shadow;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
-        }
-        
-        .cta-button:active {
-            transform: translateY(-1px);
-        }
-        
-        /* Smooth scroll */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Colores personalizados tipo Apple */
-        .text-apple-gray {
-            color: #86868b;
-        }
-        
-        .bg-apple-light {
-            background-color: #f5f5f7;
-        }
-        
-        /* Sombra suave premium */
-        .shadow-premium {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        
-        .shadow-premium-hover {
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
-        }
-        
-        /* Ocultar contenido principal inicialmente */
-        #mainContent {
-            opacity: 0;
-        }
-        
-        /* Acentos navideños sutiles */
-        .holiday-accent {
-            color: #dc2626;
-        }
-        
-        .holiday-accent-soft {
-            color: #ef4444;
-        }
-        
-        .holiday-bg-soft {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(239, 68, 68, 0.03) 100%);
-        }
-        
-        /* Badge navideño sutil */
-        .holiday-badge {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.08) 100%);
-            border: 1px solid rgba(220, 38, 38, 0.15);
-        }
-        
-        /* Loading state */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        /* Optimizaciones de legibilidad mobile */
-        @media (max-width: 640px) {
-            body {
-                font-size: 16px;
-                line-height: 1.6;
-            }
-            
-            h1, h2, h3 {
-                line-height: 1.2;
-                letter-spacing: -0.02em;
-            }
-            
-            p {
-                line-height: 1.7;
-            }
-        }
-        
-        /* Optimización de imágenes */
-        img {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-        }
-        
-        /* Reducir animaciones en dispositivos con preferencia de movimiento reducido */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Amazon Finds · Everyday Upgrades You Actually Use</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- CSS específico de la landing / productos (opcional, para detalles finos) -->
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- JS (siempre con defer) -->
+  <script defer src="/assets/js/supabase.js"></script>
+  <script defer src="/assets/js/hero.js"></script>
+  <script defer src="/assets/js/products.js"></script>
+  <script defer src="/assets/js/tracking.js"></script>
+
+  <link rel="icon" href="/assets/favicon.ico" />
 </head>
-<body class="bg-white antialiased overflow-x-hidden">
-    
-    <!-- ============================================
-         HERO SPLASH SCREEN (Fullscreen animado tipo Apple)
-         ============================================ -->
-    <div id="heroSplash" class="hero-splash fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-red-50/20">
-        <div class="text-center px-4 sm:px-6 sm:px-8">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900 mb-4 sm:mb-5 sm:mb-6 tracking-tight leading-tight">
-                Holiday Amazon 
-                <span class="relative inline-block">
-                    Finds
-                    <span class="christmas-icon absolute -top-1 -right-6 sm:-right-8 sm:-right-10 md:-right-12 text-3xl sm:text-4xl sm:text-5xl md:text-6xl lg:text-7xl">🎄</span>
-                </span>
-            </h1>
-            <p class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-600 font-medium mt-2 sm:mt-3 leading-relaxed px-2">
-                Smart gifts that make life easier
-            </p>
+
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <!-- Header minimal, sin texto comercial -->
+    </header>
+
+    <!-- HERO FULLSCREEN (aparece al entrar y luego se desvanece) -->
+    <section
+      id="hero-overlay"
+      class="fixed inset-0 z-40 flex items-center justify-center bg-white/95 backdrop-blur-sm opacity-0 scale-95 pointer-events-none transition-all duration-700"
+    >
+      <div class="max-w-xl mx-auto text-center px-6">
+        <p class="text-sm tracking-[0.25em] uppercase text-gray-400 mb-4 flex items-center justify-center gap-2">
+          <span class="text-base">🎄</span>
+          HOLIDAY FINDS
+        </p>
+        <h1 class="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4">
+          The kind of upgrades
+          <span class="font-bold">you didn’t know you needed</span>
+        </h1>
+        <p class="text-sm sm:text-base text-gray-500 mb-8">
+          Simple Amazon finds that quietly remove daily annoyances — cluttered cars, messy cables, wasted time.
+        </p>
+        <div class="inline-flex items-center gap-3 bg-black text-white px-6 py-3 rounded-full shadow-lg shadow-black/20">
+          <span class="text-sm font-medium">See what people keep rebuying</span>
+          <span class="text-xs uppercase tracking-[0.2em] text-gray-300">
+            View the picks
+          </span>
         </div>
-    </div>
-    
-    <!-- ============================================
-         CONTENIDO PRINCIPAL (aparece después del splash)
-         ============================================ -->
-    <div id="mainContent" class="opacity-0">
-        
-        <!-- Hero Section (después del splash) -->
-        <section class="bg-gradient-to-b from-white via-gray-50/50 to-white py-16 sm:py-20 sm:py-28 md:py-32 px-4 sm:px-6 holiday-bg-soft">
-            <div class="max-w-5xl mx-auto text-center fade-in-up">
-                <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight leading-tight">
-                    Smart Gifts for Everyone
-                    <span class="inline-block ml-1 sm:ml-2 text-xl sm:text-2xl md:text-3xl lg:text-4xl">🎁</span>
-                </h2>
-                <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-                    Carefully selected products that solve real problems and make great gifts
-                </p>
-            </div>
-        </section>
-        
-        <!-- Products Section -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 sm:py-16 md:py-24">
-            <!-- Loading State -->
-            <div id="loadingState" class="text-center py-20">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-                <p class="mt-4 text-gray-600">Loading products...</p>
-            </div>
-            
-            <!-- Error State -->
-            <div id="errorState" class="hidden text-center py-20">
-                <p class="text-red-600 mb-4">Error loading products. Please refresh the page.</p>
-                <button onclick="location.reload()" class="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors">
-                    Refresh Page
-                </button>
-            </div>
-            
-            <!-- Products Container -->
-            <div id="productsContainer" class="hidden space-y-16 sm:space-y-20 sm:space-y-24 md:space-y-32">
-                <!-- Los productos se cargarán dinámicamente aquí -->
-            </div>
-        </main>
-        
-        <!-- Footer con Disclaimer -->
-        <footer class="bg-apple-light border-t border-gray-200/60 py-10 sm:py-12 sm:py-16 px-4 sm:px-6 mt-20 sm:mt-24 sm:mt-32">
-            <div class="max-w-5xl mx-auto text-center">
-                <p class="text-xs sm:text-sm md:text-base text-apple-gray leading-relaxed flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
-                    <span class="text-xs">🎅</span>
-                    <span>As an Amazon Associate I earn from qualifying purchases.</span>
-                </p>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- JavaScript para Supabase y funcionalidad -->
-    <script>
-        // ============================================
-        // VARIABLES GLOBALES
-        // ============================================
-        let supabase = null;
-        
-        // ============================================
-        // INICIALIZACIÓN DE LA APP
-        // ============================================
-        function initializeApp() {
-            // Obtener credenciales desde window (cargadas por loadConfig)
-            const SUPABASE_URL = window.SUPABASE_URL;
-            const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
-            
-            // Validar que las credenciales estén configuradas
-            if (!SUPABASE_URL || !SUPABASE_ANON_KEY || 
-                SUPABASE_URL === 'YOUR_SUPABASE_URL' || 
-                SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-                console.error('⚠️ Supabase credentials not configured. Please set environment variables in Vercel.');
-                showError();
-                return;
-            }
-            
-            // Inicializar cliente Supabase
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // Cargar productos
-            loadProducts();
-        }
-        
-        // ============================================
-        // FUNCIONES PRINCIPALES
-        // ============================================
-        
-        /**
-         * Cargar productos desde Supabase
-         */
-        async function loadProducts() {
-            try {
-                const { data: products, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('Error loading products:', error);
-                    showError();
-                    return;
-                }
-                
-                if (products && products.length > 0) {
-                    displayProducts(products);
-                } else {
-                    showError('No products found');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showError();
-            }
-        }
-        
-        /**
-         * Mostrar productos en el DOM
-         */
-        function displayProducts(products) {
-            const container = document.getElementById('productsContainer');
-            const loadingState = document.getElementById('loadingState');
-            const errorState = document.getElementById('errorState');
-            
-            // Ocultar loading y error
-            loadingState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            
-            // Mostrar container
-            container.classList.remove('hidden');
-            
-            // Limpiar container
-            container.innerHTML = '';
-            
-            // Íconos navideños para badges
-            const holidayIcons = ['🎄', '🎁', '❄️', '⭐', '✨'];
-            
-            // Crear cards para cada producto
-            products.forEach((product, index) => {
-                const card = createProductCard(product, holidayIcons[index % holidayIcons.length], index);
-                container.appendChild(card);
-            });
-        }
-        
-        /**
-         * Crear card de producto
-         */
-        function createProductCard(product, holidayIcon, index) {
-            const article = document.createElement('article');
-            article.className = `product-card fade-in-up`;
-            article.style.animationDelay = `${(index + 1) * 0.1}s`;
-            
-            // Badge navideño
-            const badgeIcon = index % 2 === 0 ? '🎄' : '🎁';
-            
-            article.innerHTML = `
-                <div class="bg-white rounded-2xl sm:rounded-3xl sm:rounded-[2rem] shadow-premium overflow-hidden border border-gray-100/80 hover:shadow-premium-hover transition-shadow duration-300 relative">
-                    <!-- Badge navideño sutil -->
-                    <div class="absolute top-3 sm:top-4 left-3 sm:left-4 z-10 holiday-badge rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center gap-1 sm:gap-1.5">
-                        <span class="text-xs">${badgeIcon}</span>
-                        <span class="text-xs font-semibold holiday-accent-soft">Perfect Gift</span>
-                    </div>
-                    <!-- Imagen del producto -->
-                    <div class="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                        <img 
-                            src="${product.image_url || '/assets/images/placeholder.jpg'}" 
-                            alt="${product.title || 'Product'}"
-                            class="product-image w-full h-64 sm:h-72 sm:h-80 md:h-96 lg:h-[28rem] object-cover"
-                            loading="lazy"
-                            decoding="async"
-                            width="800"
-                            height="600"
-                            onerror="this.src='/assets/images/placeholder.jpg'"
-                        >
-                    </div>
-                    <!-- Contenido del producto -->
-                    <div class="p-5 sm:p-6 sm:p-8 md:p-10 lg:p-12">
-                        <!-- Categoría -->
-                        <p class="text-xs sm:text-sm font-semibold text-apple-gray uppercase tracking-widest mb-3 sm:mb-4 sm:mb-5 flex items-center gap-1.5 sm:gap-2">
-                            <span class="text-xs sm:text-sm">${holidayIcon}</span>
-                            <span>${product.category || 'Product'}</span>
-                        </p>
-                        <!-- Título -->
-                        <h3 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-5 sm:mb-6 tracking-tight leading-tight">
-                            ${product.title || 'Product Title'}
-                        </h3>
-                        <!-- Descripción -->
-                        <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-10 sm:mb-12 leading-relaxed max-w-2xl">
-                            ${product.description || 'Product description'}
-                        </p>
-                        <!-- Botón CTA -->
-                        <button 
-                            onclick="handleProductClick('${product.id}', '${product.affiliate_url || ''}')"
-                            class="cta-button inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 sm:px-12 py-4 sm:py-5 sm:py-6 bg-red-600 hover:bg-red-700 text-white text-base sm:text-lg md:text-xl font-semibold rounded-xl sm:rounded-2xl text-center shadow-lg hover:shadow-xl min-h-[52px] sm:min-h-[56px] sm:min-h-[64px]"
-                        >
-                            View on Amazon
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            return article;
-        }
-        
-        /**
-         * Manejar click en producto
-         * Registra el click en Supabase (product_id, user_agent) y redirige
-         * No bloquea la redirección - maneja errores silenciosamente
-         */
-        async function handleProductClick(productId, affiliateUrl) {
-            // Redirigir inmediatamente sin esperar el tracking
-            if (affiliateUrl) {
-                window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
-            }
-            
-            // Tracking asíncrono (no bloquea la redirección)
-            trackClickAsync(productId).catch(() => {
-                // Errores manejados silenciosamente - no se muestra nada al usuario
-            });
-        }
-        
-        /**
-         * Registrar click de forma asíncrona
-         * Incluye product_id y user_agent
-         */
-        async function trackClickAsync(productId) {
-            try {
-                // Obtener user agent del navegador
-                const userAgent = navigator.userAgent || 'Unknown';
-                
-                // Registrar click en Supabase
-                const { error } = await supabase
-                    .from('clicks')
-                    .insert([
-                        {
-                            product_id: productId,
-                            user_agent: userAgent,
-                            clicked_at: new Date().toISOString()
-                        }
-                    ]);
-                
-                // Si hay error, solo loguear en consola (modo desarrollo)
-                // En producción, los errores se ignoran silenciosamente
-                if (error) {
-                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                        console.warn('Tracking error (dev only):', error);
-                    }
-                }
-            } catch (error) {
-                // Errores manejados silenciosamente
-                // Solo loguear en desarrollo local
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                    console.warn('Tracking error (dev only):', error);
-                }
-            }
-        }
-        
-        /**
-         * Mostrar estado de error
-         */
-        function showError(message) {
-            const loadingState = document.getElementById('loadingState');
-            const errorState = document.getElementById('errorState');
-            const productsContainer = document.getElementById('productsContainer');
-            
-            loadingState.classList.add('hidden');
-            productsContainer.classList.add('hidden');
-            errorState.classList.remove('hidden');
-            
-            if (message) {
-                const errorText = errorState.querySelector('p');
-                if (errorText) {
-                    errorText.textContent = message;
-                }
-            }
-        }
-        
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
-        
-        // Manejar splash screen
-        (function() {
-            'use strict';
-            
-            function init() {
-                const splash = document.getElementById('heroSplash');
-                const mainContent = document.getElementById('mainContent');
-                
-                if (!splash || !mainContent) return;
-                
-                // Después de 2 segundos, ocultar splash y mostrar contenido
-                setTimeout(function() {
-                    splash.style.display = 'none';
-                    mainContent.style.opacity = '0';
-                    mainContent.style.transition = 'opacity 0.8s ease-in';
-                    
-                    setTimeout(function() {
-                        mainContent.style.opacity = '1';
-                        
-                        // Cargar productos después de mostrar el contenido
-                        loadProducts();
-                    }, 50);
-                }, 2000);
-            }
-            
-            // Inicializar cuando el DOM esté listo
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-        })();
-    </script>
+      </div>
+    </section>
+
+    <!-- HERO EN FRANJA / MARQUEE (queda activo después de la animación inicial) -->
+    <section
+      id="hero-strip"
+      class="hidden mb-8 rounded-2xl border border-gray-100 bg-white/80 shadow-sm shadow-gray-200/60 overflow-hidden"
+    >
+      <div class="hero-marquee-shell">
+        <div class="hero-marquee px-5 py-3 text-xs sm:text-[0.8rem] text-gray-500">
+          <span>Less clutter, more calm ·</span>
+          <span> Faster everyday routines ·</span>
+          <span> Gifts that actually get used ·</span>
+          <span> No learning curve ·</span>
+          <span> Subtle tech, real comfort ·</span>
+          <span> Amazon‑trusted picks ·</span>
+          <span> Small fixes for daily annoyances ·</span>
+          <span> Easy setup · No stress ·</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección productos (rellenada por products.js desde Supabase) -->
+    <section id="products-section">
+      <div class="products-header">
+        <h2 class="products-title">Products people didn’t expect to love — until they used them</h2>
+        <p class="products-subtitle">
+          Not flashy gadgets. Just small upgrades that make everyday life feel smoother.
+        </p>
+      </div>
+      <main id="products" class="products-grid"></main>
+    </section>
+
+    <p class="text-[0.8rem] text-gray-400 mt-4 max-w-2xl leading-relaxed">
+      No pressure to buy — browse at your own pace. You stay in control and complete every purchase directly on Amazon,
+      where you can double‑check ratings, shipping options, and return policies before deciding.
+    </p>
+
+    <footer class="site-footer">
+      <span>
+        This site uses Amazon affiliate links. We may earn a commission from qualifying purchases at no extra cost to you.
+      </span>
+      <span>
+        All information is for general convenience only. Always confirm price, availability, and details directly on Amazon before buying.
+      </span>
+    </footer>
+  </div>
 </body>
 </html>
