@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting...</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/supabase.js"></script>
+</head>
+<body>
+  <script>
+    // Wait for Supabase to initialize
+    (async () => {
+      // Wait a bit for supabase.js to load
+      let attempts = 0;
+      while (!window.supabaseClient && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (!window.supabaseClient) {
+        console.error('Supabase client not initialized');
+        window.location.href = '/';
+        return;
+      }
+
+      // Get product ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      
+      if (!productId) {
+        window.location.href = '/';
+        return;
+      }
+
+      try {
+        // Get referrer
+        const referrer = document.referrer || null;
+        const userAgent = navigator.userAgent || 'unknown';
+
+        // Get product URL from database
+        const { data: product, error: productError } = await window.supabaseClient
+          .from('products')
+          .select('affiliate_url')
+          .eq('id', productId)
+          .single();
+
+        if (productError || !product || !product.affiliate_url) {
+          console.error('Product not found:', productError);
+          window.location.href = '/';
+          return;
+        }
+
+        // Register click (don't wait for it to complete)
+        window.supabaseClient
+          .from('clicks')
+          .insert({
+            product_id: productId,
+            referrer: referrer,
+            user_agent: userAgent,
+          })
+          .then(({ error }) => {
+            if (error) {
+              console.error('Error tracking click:', error);
+            }
+          })
+          .catch((err) => {
+            console.error('Exception tracking click:', err);
+          });
+
+        // Redirect immediately (don't wait for tracking)
+        window.location.href = product.affiliate_url;
+      } catch (err) {
+        console.error('Error:', err);
+        window.location.href = '/';
+      }
+    })();
+  </script>
+</body>
+</html>
+

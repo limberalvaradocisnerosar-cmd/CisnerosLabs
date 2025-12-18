@@ -97,14 +97,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             >
           </div>
           <p class="product-description">${description}</p>
-          <button
-            type="button"
-            data-id="${product.id}"
-            data-url="${productUrl}"
-            class="product-cta track-click"
+          <a
+            href="/go.html?id=${product.id}"
+            class="product-cta"
           >
             <span>Get it now on Amazon →</span>
-          </button>
+          </a>
         </article>
       `;
     })

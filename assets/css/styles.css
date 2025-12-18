@@ -373,6 +373,7 @@ a {
   transition: all 0.25s ease;
   min-height: 52px;
   width: calc(100% - 2.5rem);
+  text-decoration: none;
 }
 
 @media (min-width: 640px) {
