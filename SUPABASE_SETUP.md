@@ -4,7 +4,7 @@
 1. [Crear Proyecto en Supabase](#1-crear-proyecto-en-supabase)
 2. [Crear Tablas](#2-crear-tablas)
 3. [Configurar Autenticación](#3-configurar-autenticación)
-4. [Configurar Credenciales](#4-configurar-credenciales)
+4. [Configurar Variables de Entorno en Vercel](#4-configurar-variables-de-entorno-en-vercel)
 5. [Desplegar en Vercel](#5-desplegar-en-vercel)
 
 ---
@@ -128,36 +128,64 @@ INSERT INTO products (title, description, category, image_url, affiliate_url) VA
 
 ---
 
-## 4. Configurar Credenciales
+## 4. Configurar Variables de Entorno en Vercel
 
-### Paso 1: Actualizar `index.html`
-Abre `index.html` y busca estas líneas (alrededor de la línea 313):
+### ⚠️ IMPORTANTE: Ya NO necesitas editar los archivos HTML
 
-```javascript
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+Las credenciales ahora se configuran directamente en Vercel usando variables de entorno. Esto es más seguro y profesional.
+
+### Paso 1: Obtener credenciales de Supabase
+1. En Supabase Dashboard → **Settings** → **API**
+2. Copia:
+   - **Project URL**: `https://xxxxx.supabase.co`
+   - **anon public key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+### Paso 2: Configurar variables en Vercel
+
+**Opción A: Desde Vercel Dashboard (Recomendado)**
+
+1. Ve a tu proyecto en [vercel.com](https://vercel.com)
+2. Haz clic en **Settings** → **Environment Variables**
+3. Agrega las siguientes variables:
+
+| Variable | Valor | Ambiente |
+|----------|-------|----------|
+| `SUPABASE_URL` | `https://xxxxx.supabase.co` | Production, Preview, Development |
+| `SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` | Production, Preview, Development |
+| `ALLOWED_EMAIL` | `admin@example.com` | Production, Preview, Development |
+
+4. Haz clic en **Save** para cada variable
+5. **IMPORTANTE**: Después de agregar las variables, necesitas hacer un **nuevo deploy** para que se apliquen
+
+**Opción B: Desde Vercel CLI**
+
+```bash
+# Instalar Vercel CLI si no lo tienes
+npm install -g vercel
+
+# Login
+vercel login
+
+# Agregar variables de entorno
+vercel env add SUPABASE_URL
+vercel env add SUPABASE_ANON_KEY
+vercel env add ALLOWED_EMAIL
+
+# Para cada variable, selecciona:
+# - Production: Yes
+# - Preview: Yes
+# - Development: Yes
 ```
 
-Reemplaza con tus credenciales:
-```javascript
-const SUPABASE_URL = 'https://xxxxx.supabase.co'; // Tu Project URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Tu anon key
-```
+### Paso 3: Redesplegar
 
-### Paso 2: Actualizar `admin.html`
-Abre `admin.html` y busca estas líneas (alrededor de la línea 242):
+Después de agregar las variables, necesitas hacer un nuevo deploy:
 
-```javascript
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-const ALLOWED_EMAIL = 'admin@example.com'; // Cambia por tu email
-```
+```bash
+# Desde CLI
+vercel --prod
 
-Reemplaza con tus credenciales:
-```javascript
-const SUPABASE_URL = 'https://xxxxx.supabase.co'; // Tu Project URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Tu anon key
-const ALLOWED_EMAIL = 'admin@example.com'; // El email que creaste en Supabase Auth
+# O desde GitHub: haz un push nuevo o re-deploy desde el dashboard
 ```
 
 ---
@@ -171,20 +199,14 @@ const ALLOWED_EMAIL = 'admin@example.com'; // El email que creaste en Supabase A
 # Asegúrate de estar en el directorio del proyecto
 cd C:\Users\Hp\Desktop\miniWeb-Amazon
 
-# Inicializar git si no está inicializado
-git init
-
 # Agregar todos los archivos
 git add .
 
-# Commit inicial
-git commit -m "Initial commit: Landing page with Supabase tracking"
-
-# Agregar repositorio remoto (reemplaza con tu repo)
-git remote add origin https://github.com/tu-usuario/tu-repo.git
+# Commit
+git commit -m "Ready for Vercel deployment with environment variables"
 
 # Push a main
-git push -u origin main
+git push origin main
 ```
 
 #### Paso 2: Conectar con Vercel
@@ -193,23 +215,13 @@ git push -u origin main
 3. Haz clic en **"Add New Project"**
 4. Selecciona tu repositorio de GitHub
 5. Vercel detectará automáticamente la configuración
-6. **IMPORTANTE**: No necesitas cambiar nada en "Build Settings"
+6. **NO necesitas cambiar nada en "Build Settings"**
 7. Haz clic en **"Deploy"**
 
-#### Paso 3: Configurar variables de entorno (Opcional)
-Si prefieres no hardcodear las credenciales:
-
-1. En Vercel Dashboard → Tu proyecto → **Settings** → **Environment Variables**
-2. Agrega:
-   - `SUPABASE_URL` = `https://xxxxx.supabase.co`
-   - `SUPABASE_ANON_KEY` = `tu-anon-key`
-   - `ALLOWED_EMAIL` = `admin@example.com`
-
-Luego actualiza `index.html` y `admin.html` para leer desde variables:
-```javascript
-const SUPABASE_URL = window.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-```
+#### Paso 3: Configurar variables de entorno
+1. Después del primer deploy, ve a **Settings** → **Environment Variables**
+2. Agrega las 3 variables como se explicó en la sección 4
+3. Haz clic en **"Redeploy"** o haz un nuevo push a GitHub
 
 ### Opción B: Desde CLI de Vercel
 
@@ -235,6 +247,17 @@ vercel
 vercel --prod
 ```
 
+#### Paso 4: Configurar variables
+```bash
+# Agregar variables de entorno
+vercel env add SUPABASE_URL
+vercel env add SUPABASE_ANON_KEY
+vercel env add ALLOWED_EMAIL
+
+# Redesplegar para aplicar cambios
+vercel --prod
+```
+
 ---
 
 ## ✅ Checklist Final
@@ -245,28 +268,38 @@ Antes de desplegar, verifica:
 - [ ] Tabla `products` creada con datos
 - [ ] Tabla `clicks` creada
 - [ ] Usuario admin creado en Supabase Auth
-- [ ] Credenciales actualizadas en `index.html`
-- [ ] Credenciales actualizadas en `admin.html`
-- [ ] `ALLOWED_EMAIL` configurado en `admin.html`
+- [ ] Variables de entorno configuradas en Vercel:
+  - [ ] `SUPABASE_URL`
+  - [ ] `SUPABASE_ANON_KEY`
+  - [ ] `ALLOWED_EMAIL`
 - [ ] Archivos subidos a GitHub (si usas Opción A)
 - [ ] `vercel.json` existe y está configurado
 - [ ] Imágenes en `/assets/images/` están presentes
+- [ ] **Nuevo deploy realizado después de agregar variables**
 
 ---
 
 ## 🔧 Solución de Problemas
 
 ### Error: "Invalid API key"
+- Verifica que las variables de entorno estén configuradas en Vercel
+- Asegúrate de haber hecho un **nuevo deploy** después de agregar las variables
 - Verifica que copiaste correctamente la `anon key` de Supabase
 - Asegúrate de usar la `anon public key`, no la `service_role key`
 
 ### Error: "Access denied" en dashboard
-- Verifica que el email en `ALLOWED_EMAIL` coincide con el usuario creado en Supabase Auth
+- Verifica que `ALLOWED_EMAIL` en Vercel coincida con el usuario creado en Supabase Auth
 - Asegúrate de que el usuario tenga `Auto Confirm User` activado
+- Verifica que hayas hecho un nuevo deploy después de agregar `ALLOWED_EMAIL`
 
 ### Error: "Table does not exist"
 - Verifica que ejecutaste todos los SQL scripts
 - Revisa que las tablas estén en el esquema `public`
+
+### Error: "Configuration error" en la página
+- Verifica que las variables de entorno estén configuradas en Vercel
+- Asegúrate de haber hecho un **nuevo deploy** después de agregar las variables
+- Revisa los logs de Vercel para ver si hay errores en `/api/config`
 
 ### Imágenes no cargan en Vercel
 - Verifica que las imágenes estén en `/assets/images/`
@@ -278,14 +311,18 @@ Antes de desplegar, verifica:
 
 1. **Seguridad**: La `anon key` es pública y está bien exponerla en el frontend. Supabase usa RLS (Row Level Security) para proteger los datos.
 
-2. **RLS Policies**: Las políticas que creamos permiten:
+2. **Variables de Entorno**: Ahora las credenciales se gestionan desde Vercel, no están hardcodeadas en el código. Esto es más seguro y profesional.
+
+3. **RLS Policies**: Las políticas que creamos permiten:
    - Lectura pública de productos (para la landing page)
    - Inserción pública de clicks (para tracking)
    - Lectura de clicks solo para usuarios autenticados (para el dashboard)
 
-3. **Backup**: Considera hacer backup de tus datos importantes. En el plan free, puedes exportar datos desde el dashboard.
+4. **Redesplegar**: Después de agregar o modificar variables de entorno, **siempre** necesitas hacer un nuevo deploy para que se apliquen.
 
-4. **Límites Free Tier**:
+5. **Backup**: Considera hacer backup de tus datos importantes. En el plan free, puedes exportar datos desde el dashboard.
+
+6. **Límites Free Tier**:
    - 500 MB de base de datos
    - 2 GB de bandwidth
    - 50,000 usuarios activos mensuales
@@ -299,8 +336,31 @@ Una vez completados estos pasos, tu landing page estará:
 - ✅ Conectada a Supabase
 - ✅ Tracking de clicks funcionando
 - ✅ Dashboard admin protegido
+- ✅ Credenciales gestionadas desde variables de entorno (más seguro)
 
 **URLs**:
 - Landing page: `https://tu-proyecto.vercel.app`
 - Dashboard: `https://tu-proyecto.vercel.app/admin.html`
+- API Config: `https://tu-proyecto.vercel.app/api/config`
 
+---
+
+## 🔄 Flujo de Configuración
+
+```
+1. Crear proyecto en Supabase
+   ↓
+2. Crear tablas (products, clicks)
+   ↓
+3. Crear usuario admin
+   ↓
+4. Obtener credenciales (URL, anon key)
+   ↓
+5. Desplegar en Vercel
+   ↓
+6. Configurar variables de entorno en Vercel
+   ↓
+7. Redesplegar para aplicar variables
+   ↓
+8. ¡Listo! 🎉
+```
